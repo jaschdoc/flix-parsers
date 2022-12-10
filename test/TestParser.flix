@@ -33,4 +33,11 @@ namespace TestParser {
         let expected = ("a", input) :: Nil;
         eq(expected, actual)
 
+    @test
+    def succeed04(): Bool =
+        let input = "abc" :: "123" :: "hey" :: Nil;
+        let actual = Parser.succeed("success", input);
+        let expected = ("success", input) :: Nil;
+        eq(expected, actual)
+
 }
