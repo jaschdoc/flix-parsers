@@ -40,7 +40,7 @@ namespace Parser {
     /// and the first element satisfies the predicate `p`.
     /// Returns an empty `ParseResult` otherwise.
     ///
-    pub def satisfy(p: a -> Bool \ ef, input: Input[a]): ParseResult[a, a] \ ef = match input {
+    pub def satisfy(p: a -> Bool, input: Input[a]): ParseResult[a, a] = match input {
         case Nil             => fail(input)
         case x :: xs if p(x) => succeed(x, xs)
         case _ :: xs         => fail(xs)
@@ -53,5 +53,12 @@ namespace Parser {
     ///
     pub def literal(a: a, input: Input[a]): ParseResult[a, a] with Eq[a] =
         satisfy(Eq.eq(a) , input)
+
+    ///
+    /// Returns the result of parser `p1` applied to `input`
+    /// followed by the result of parser `p2` applied to `input`.
+    ///
+    pub def append(p1: Parser[a, b], p2: Parser[a, b], input: Input[b]): ParseResult[a, b] =
+        p1(input) ::: p2(input)
 
 }
