@@ -82,9 +82,23 @@ namespace Parser {
         ) yield (f(x), rest)
 
     ///
+    /// Returns zero or more results of the parser `p`.
+    ///
+    pub def many(p: Parser[a, b], input: Input[b]): ParseResult[List[a], b] =
+        let p1 = (p `then` many(p)) `using` cons;
+        append(p1, succeed(Nil), input)
+
+    ///
     /// Returns the string `s` as an `Input` type.
     ///
     pub def inputFromString(s: String): Input[Char] =
         String.toList(s)
+
+    ///
+    /// Returns the tuple as a list, i.e.
+    /// `(x, xs)` is returned as `x :: xs`.
+    ///
+    def cons(xs: (a, List[a])): List[a] =
+        fst(xs) :: snd(xs)
 
 }
