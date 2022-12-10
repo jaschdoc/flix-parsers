@@ -20,7 +20,7 @@ namespace TestParser {
 
     // Helper functions
 
-    def noInput(): List[String] = Nil
+    def noInput(): List[Char] = Nil
 
     def input(s: String): List[Char] =
         Parser.inputFromString(s)
@@ -65,7 +65,7 @@ namespace TestParser {
     @test
     def fail01(): Bool =
         let input = noInput();
-        let actual: ParseResult[String, String] = fail(input);
+        let actual: ParseResult[Char, Char] = fail(input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
@@ -91,7 +91,7 @@ namespace TestParser {
     @test
     def satisfy01(): Bool =
         let input = noInput();
-        let actual = Parser.satisfy(a -> a == "a", input);
+        let actual = Parser.satisfy(a -> a == 'a', input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
@@ -131,7 +131,7 @@ namespace TestParser {
     @test
     def literal01(): Bool =
         let input = noInput();
-        let actual = literal("a", input);
+        let actual = literal('a', input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
@@ -171,7 +171,7 @@ namespace TestParser {
     @test
     def append01(): Bool =
         let input = noInput();
-        let actual = append(literal("a"), literal("b"), input);
+        let actual = append(literal('a'), literal('b'), input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
@@ -285,21 +285,21 @@ namespace TestParser {
     @test
     def then01(): Bool =
         let input = noInput();
-        let actual: ParseResult[(Char, Char), String] = input |> (fail `then` fail);
+        let actual: ParseResult[(Char, Char), Char] = input |> (fail `then` fail);
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def then02(): Bool =
         let input = noInput();
-        let actual: ParseResult[(Char, Char), String] = input |> (fail `then` succeed('a'));
+        let actual: ParseResult[(Char, Char), Char] = input |> (fail `then` succeed('a'));
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def then03(): Bool =
         let input = noInput();
-        let actual: ParseResult[(Char, Char), String] = input |> (succeed('a') `then` fail);
+        let actual: ParseResult[(Char, Char), Char] = input |> (succeed('a') `then` fail);
         let expected = Nil;
         Assert.eq(expected, actual)
 
@@ -352,7 +352,7 @@ namespace TestParser {
     @test
     def using01(): Bool =
         let input = noInput();
-        let actual: ParseResult[String, String] = input |> (fail `using` (x -> x + "Hey"));
+        let actual: ParseResult[String, Char] = input |> (fail `using` (c -> if (c == 'c') "C" else ""));
         let expected = Nil;
         Assert.eq(expected, actual)
 
@@ -387,7 +387,7 @@ namespace TestParser {
     @test
     def many01(): Bool =
         let input = noInput();
-        let actual = input |> many(literal("a"));
+        let actual = input |> many(literal('a'));
         let expected = (Nil, Nil) :: Nil;
         Assert.eq(expected, actual)
 
