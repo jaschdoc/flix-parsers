@@ -61,4 +61,21 @@ namespace Parser {
     pub def append(p1: Parser[a, b], p2: Parser[a, b], input: Input[b]): ParseResult[a, b] =
         p1(input) ::: p2(input)
 
+    ///
+    /// Returns the `ParseResult` of sequencing `p1`, `p2`, i.e.
+    /// `p1` is applied to the input and `p2` is applied to the
+    /// input that `p1` did not consume.
+    ///
+    pub def then(p1: Parser[a, b], p2: Parser[c, b], input: Input[b]): ParseResult[(a, c), b] =
+        for (
+            (x1, rest1) <- p1(input);
+            (x2, rest2) <- p2(rest1)
+        ) yield ((x1, x2), rest2)
+
+    ///
+    /// Returns the string `s` as an `Input` type.
+    ///
+    pub def inputFromString(s: String): Input[Char] =
+        String.toList(s)
+
 }
