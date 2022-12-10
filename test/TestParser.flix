@@ -20,7 +20,8 @@ namespace TestParser {
 
     def noInput(): List[String] = Nil
 
-    def input(s: String): List[String] = s :: Nil
+    def input(s: String): List[Char] =
+        Parser.inputFromString(s)
 
     ////////////////////////////////////////////////////////////////////////
     // Succeed                                                            //
@@ -69,7 +70,7 @@ namespace TestParser {
     @test
     def fail03(): Bool =
         let input = input("abc");
-        let actual: ParseResult[String, String] = Parser.fail(input);
+        let actual: ParseResult[String, Char] = Parser.fail(input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
@@ -95,8 +96,8 @@ namespace TestParser {
     @test
     def satisfy02(): Bool =
         let input = input("a");
-        let actual = Parser.satisfy(a -> a == "a", input);
-        let expected = ("a", Nil) :: Nil;
+        let actual = Parser.satisfy(a -> a == 'a', input);
+        let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
@@ -135,8 +136,8 @@ namespace TestParser {
     @test
     def literal02(): Bool =
         let input = input("a");
-        let actual = Parser.literal("a", input);
-        let expected = ("a", Nil) :: Nil;
+        let actual = Parser.literal('a', input);
+        let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
@@ -175,8 +176,8 @@ namespace TestParser {
     @test
     def append02(): Bool =
         let input = input("a");
-        let actual = Parser.append(Parser.literal("a"), Parser.literal("b"), input);
-        let expected = ("a", Nil) :: Nil;
+        let actual = Parser.append(Parser.literal('a'), Parser.literal('b'), input);
+        let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
@@ -217,7 +218,7 @@ namespace TestParser {
     @test
     def append08(): Bool =
         let input = input("c");
-        let actual = Parser.append(Parser.literal("a"), Parser.literal("b"), input);
+        let actual = Parser.append(Parser.literal('a'), Parser.literal('b'), input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
