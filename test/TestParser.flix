@@ -16,7 +16,7 @@
 
 namespace TestParser {
 
-    use Parser.{succeed, fail, literal, append, then, using};
+    use Parser.{succeed, fail, literal, append, then, using, many};
 
     // Helper functions
 
@@ -377,6 +377,44 @@ namespace TestParser {
         let f = c -> if (c == 'c') 1 else 0;
         let actual = input |> (literal('c') `using` f);
         let expected = (1, 'b' :: 'a' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Many                                                               //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def many01(): Bool =
+        let input = noInput();
+        let actual = input |> many(literal("a"));
+        let expected = (Nil, Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def many02(): Bool =
+        let input = input("b");
+        let actual = input |> many(literal('a'));
+        let expected = (Nil, 'b' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def many03(): Bool =
+        let input = input("ab");
+        let actual = input |> many(literal('a'));
+        let expected = ('a' :: Nil, 'b' :: Nil) :: (Nil, 'a' :: 'b' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def many04(): Bool =
+        let input = input("aaab");
+        let actual = input |> many(literal('a'));
+        let expected =
+            ('a' :: 'a' :: 'a' :: Nil, 'b' :: Nil) ::
+            ('a' :: 'a' :: Nil, 'a' :: 'b' :: Nil) ::
+            ('a' :: Nil, 'a' :: 'a' :: 'b' :: Nil) ::
+            (Nil, 'a' :: 'a' :: 'a' :: 'b' :: Nil) ::
+            Nil;
         Assert.eq(expected, actual)
 
 }
