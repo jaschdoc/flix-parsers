@@ -167,8 +167,92 @@ namespace TestParser {
 
     @test
     def append01(): Bool =
-        let input: List[String] = noInput();
+        let input = noInput();
         let actual = Parser.append(Parser.literal("a"), Parser.literal("b"), input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append02(): Bool =
+        let input = input("a");
+        let actual = Parser.append(Parser.literal("a"), Parser.literal("b"), input);
+        let expected = ("a", Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append03(): Bool =
+        let input = "a" :: "b" :: Nil;
+        let actual = Parser.append(Parser.literal("a"), Parser.literal("b"), input);
+        let expected = ("a", "b" :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append04(): Bool =
+        let input = "a" :: "b" :: Nil;
+        let actual = Parser.append(Parser.literal("a"), Parser.literal("a"), input);
+        let expected = ("a", "b" :: Nil) :: ("a", "b" :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append05(): Bool =
+        let input = "b" :: "a" :: Nil;
+        let actual = Parser.append(Parser.literal("a"), Parser.literal("b"), input);
+        let expected = ("b", "a" :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append06(): Bool =
+        let input = "b" :: "b" :: Nil;
+        let actual = Parser.append(Parser.literal("a"), Parser.literal("b"), input);
+        let expected = ("b", "b" :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append07(): Bool =
+        let input = "b" :: "c" :: Nil;
+        let actual = Parser.append(Parser.literal("b"), Parser.literal("b"), input);
+        let expected = ("b", "c" :: Nil) :: ("b", "c" :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append08(): Bool =
+        let input = input("c");
+        let actual = Parser.append(Parser.literal("a"), Parser.literal("b"), input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append09(): Bool =
+        let input = noInput();
+        let actual = Parser.append(Parser.succeed("1"), Parser.succeed("2"), input);
+        let expected = ("1", Nil) :: ("2", Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append10(): Bool =
+        let input = "a" :: "b" :: "c" :: Nil;
+        let actual = Parser.append(Parser.succeed("1"), Parser.succeed("2"), input);
+        let expected = ("1", "a" :: "b" :: "c" :: Nil) :: ("2", "a" :: "b" :: "c" :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append11(): Bool =
+        let input = "a" :: "b" :: "c" :: Nil;
+        let actual = Parser.append(Parser.succeed("1"), Parser.fail, input);
+        let expected = ("1", "a" :: "b" :: "c" :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append12(): Bool =
+        let input = "a" :: "b" :: "c" :: Nil;
+        let actual = Parser.append(Parser.fail, Parser.succeed("1"), input);
+        let expected = ("1", "a" :: "b" :: "c" :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append13(): Bool =
+        let input = "a" :: "b" :: "c" :: Nil;
+        let actual: ParseResult[String, String] = Parser.append(Parser.fail, Parser.fail, input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
