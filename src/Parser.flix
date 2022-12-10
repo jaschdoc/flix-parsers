@@ -88,6 +88,11 @@ namespace Parser {
     ///
     /// Returns zero or more results of the parser `p`.
     ///
+    /// Note that it always succeeds, so the result will always
+    /// be non-empty, but the rest of the input may be `Nil`, along
+    /// with the result. I.e. both the value of `List[a]` may be `Nil`
+    /// and `b` may be `Nil`.
+    ///
     /// Equivalent to `A*`.
     ///
     pub def many(p: Parser[a, b], input: Input[b]): ParseResult[List[a], b] =
