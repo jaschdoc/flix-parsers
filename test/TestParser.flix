@@ -256,4 +256,22 @@ namespace TestParser {
         let expected = Nil;
         Assert.eq(expected, actual)
 
+    // Associativity
+
+    @test
+    def append14(): Bool =
+        let input = noInput();
+        let p1 = Parser.append(Parser.succeed("a"), Parser.succeed("b"));
+        let actual = Parser.append(p1, Parser.succeed("c"), input);
+        let expected = ("a", Nil) :: ("b", Nil) :: ("c", Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def append15(): Bool =
+        let input = noInput();
+        let p2 = Parser.append(Parser.succeed("b"), Parser.succeed("c"));
+        let actual = Parser.append(Parser.succeed("a"), p2, input);
+        let expected = ("a", Nil) :: ("b", Nil) :: ("c", Nil) :: Nil;
+        Assert.eq(expected, actual)
+
 }
