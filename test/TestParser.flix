@@ -331,4 +331,18 @@ namespace TestParser {
         let expected = Nil;
         Assert.eq(expected, actual)
 
+    @test
+    def then08(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `then` literal('b') `then` literal('c'));
+        let expected = ((('a', 'b'), 'c'), Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def then09(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `then` (literal('b') `then` literal('c')));
+        let expected = (('a', ('b', 'c')), Nil) :: Nil;
+        Assert.eq(expected, actual)
+
 }
