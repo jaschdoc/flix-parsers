@@ -9,7 +9,7 @@ namespace TestParser {
     def input(s: String): List[String] = s :: Nil
 
     ////////////////////////////////////
-    /// Succeed                      ///
+    // Succeed                        //
     ////////////////////////////////////
 
     @test
