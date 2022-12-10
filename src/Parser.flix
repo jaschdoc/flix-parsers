@@ -32,6 +32,8 @@ namespace Parser {
     ///
     /// Returns an empty `ParseResult` regardless of input.
     ///
+    /// Equivalent to the empty string ϵ.
+    ///
     pub def fail(_: Input[b]): ParseResult[a, b] =
         Nil
 
@@ -66,6 +68,8 @@ namespace Parser {
     /// `p1` is applied to the input and `p2` is applied to the
     /// input that `p1` did not consume.
     ///
+    /// Equivalent to `AB` where `A` and `B` are non-terminals.
+    ///
     pub def then(p1: Parser[a, b], p2: Parser[c, b], input: Input[b]): ParseResult[(a, c), b] =
         for (
             (x1, rest1) <- p1(input);
@@ -83,6 +87,8 @@ namespace Parser {
 
     ///
     /// Returns zero or more results of the parser `p`.
+    ///
+    /// Equivalent to `A A* | ϵ`.
     ///
     pub def many(p: Parser[a, b], input: Input[b]): ParseResult[List[a], b] =
         let p1 = (p `then` many(p)) `using` cons;
