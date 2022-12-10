@@ -1,4 +1,4 @@
-type alias Parser[a, b] = (List[a] -> List[(b, List[a])])
+type alias Parser[a, b] = (List[a] -> List[(b, List[a])]) // Use a -> List[Validation[b, a]]
 
 namespace Parser {
 
