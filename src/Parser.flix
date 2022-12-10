@@ -88,7 +88,7 @@ namespace Parser {
     ///
     /// Returns zero or more results of the parser `p`.
     ///
-    /// Equivalent to `A A* | ϵ`.
+    /// Equivalent to `A*`.
     ///
     pub def many(p: Parser[a, b], input: Input[b]): ParseResult[List[a], b] =
         let p1 = (p `then` many(p)) `using` cons;
