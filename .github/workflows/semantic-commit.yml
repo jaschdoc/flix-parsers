@@ -1,0 +1,22 @@
+# Borrowed from https://github.com/mlutze/flix-json/blob/0c214fc693a86e84a5e0c86cb18acab4d6472685/.github/workflows/semantic-commit.yaml
+
+name: Semantic Commit Message
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  check-title:
+    runs-on: ubuntu-latest
+    env:
+      regex: "^(chore|ci|docs|feat|fix|refactor|style|test): "
+    steps:
+      - name: Check title
+        uses: actions/github-script@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: >
+            const title = context.payload.pull_request.title;
+            if (title.match(process.env.regex) === null) {
+              throw new Error("Invalid commit message '" + title + "'.")
+            }

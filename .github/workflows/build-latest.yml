@@ -1,0 +1,23 @@
+# Borrowed from https://github.com/mlutze/flix-json/blob/0c214fc693a86e84a5e0c86cb18acab4d6472685/.github/workflows/build-latest.yml
+
+name: Build on Latest Release
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-latest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-java@v2.5.0
+        with:
+          java-version: 17
+          distribution: zulu
+      - run: |
+          # download Flix JAR
+          curl -L https://github.com/flix/flix/releases/latest/download/flix.jar > flix.jar
+
+          # run tests
+          java -jar flix.jar test
