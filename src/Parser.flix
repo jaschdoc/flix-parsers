@@ -36,6 +36,6 @@ namespace Parser {
     /// Returns an empty ParseReult otherwise.
     ///
     pub def literal(a: a, input: Input[a]): ParseResult[a, a] with Eq[a] =
-        satisfy(x -> x == a , input)
+        satisfy(Eq.eq(a) , input)
 
 }
