@@ -40,4 +40,33 @@ namespace TestParser {
         let expected = ("success", input) :: Nil;
         eq(expected, actual)
 
+
+    ////////////////////////////////////
+    // Fail                           //
+    ////////////////////////////////////
+
+    @test
+    def fail01(): Bool =
+        let input = noInput();
+        let parse: Parser[String, String] = Parser.fail();
+        let actual = parse(input);
+        let expected = Nil;
+        eq(expected, actual)
+
+    @test
+    def fail03(): Bool =
+        let input = input("abc");
+        let parse: Parser[String, String] = Parser.fail();
+        let actual = parse(input);
+        let expected = Nil;
+        eq(expected, actual)
+
+    @test
+    def fail04(): Bool =
+        let input = "abc" :: "123" :: "hey" :: Nil;
+        let parse: Parser[String, String] = Parser.fail();
+        let actual = parse(input);
+        let expected = Nil;
+        eq(expected, actual)
+
 }

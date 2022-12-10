@@ -1,4 +1,4 @@
-type alias Parser[a, b] = (List[a] -> List[(b, List[a])]) // Use a -> List[Validation[b, a]]
+type alias Parser[a, b] = List[b] -> List[(a, List[b])]
 
 namespace Parser {
 
@@ -6,8 +6,8 @@ namespace Parser {
     /// Returns a parser that succeeds with value `b`,
     /// regardless of input.
     ///
-    pub def succeed(b: b): Parser[a, b] =
-        inp -> (b, inp) :: Nil
+    pub def succeed(a: a): Parser[a, b] =
+        inp -> (a, inp) :: Nil
 
     ///
     /// Returns a parser that fails regardless of input.
