@@ -87,7 +87,7 @@ namespace TestParser {
 
     @test
     def satisfy01(): Bool =
-        let input: List[String] = noInput();
+        let input = noInput();
         let actual = Parser.satisfy(a -> a == "a", input);
         let expected = Nil;
         Assert.eq(expected, actual)
@@ -157,6 +157,18 @@ namespace TestParser {
     def literal05(): Bool =
         let input = "a" :: "b" :: "c" :: Nil;
         let actual = Parser.literal("b", input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Append                                                             //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def append01(): Bool =
+        let input: List[String] = noInput();
+        let actual = Parser.append(Parser.literal("a"), Parser.literal("b"), input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
