@@ -104,4 +104,44 @@ namespace TestParser {
         let expected = Nil;
         Assert.eq(expected, actual)
 
+
+    ////////////////////////////////////
+    // Literal                        //
+    ////////////////////////////////////
+
+    @test
+    def literal01(): Bool =
+        let input = noInput();
+        let actual = Parser.literal("a", input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def literal02(): Bool =
+        let input = input("a");
+        let actual = Parser.literal("a", input);
+        let expected = ("a", Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def literal03(): Bool =
+        let input = "a" :: "b" :: "c" :: Nil;
+        let actual = Parser.literal("a", input);
+        let expected = ("a", "b" :: "c" :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def literal04(): Bool =
+        let input = "b" :: "a" :: "c" :: Nil;
+        let actual = Parser.literal("a", input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def literal05(): Bool =
+        let input = "a" :: "b" :: "c" :: Nil;
+        let actual = Parser.literal("b", input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
 }
