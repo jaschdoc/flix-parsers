@@ -16,7 +16,7 @@
 
 namespace TestParser {
 
-    use Parser.{succeed, fail, literal, append, then};
+    use Parser.{succeed, fail, literal, append, then, using};
 
     // Helper functions
 
@@ -343,6 +343,40 @@ namespace TestParser {
         let input = input("abc");
         let actual = input |> (literal('a') `then` (literal('b') `then` literal('c')));
         let expected = (('a', ('b', 'c')), Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    ////////////////////////////////////////////////////////////////////////
+    // Using                                                              //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def using01(): Bool =
+        let input = noInput();
+        let actual: ParseResult[String, String] = input |> (fail `using` (x -> x + "Hey"));
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def using02(): Bool =
+        let input = noInput();
+        let actual = input |> (succeed(1) `using` (x -> x + 2));
+        let expected = (3, Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def using03(): Bool =
+        let input = input("abc");
+        let f = c -> if (c == 'c') 1 else 0;
+        let actual = input |> (literal('a') `using` f);
+        let expected = (0, 'b' :: 'c' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def using04(): Bool =
+        let input = input("cba");
+        let f = c -> if (c == 'c') 1 else 0;
+        let actual = input |> (literal('c') `using` f);
+        let expected = (1, 'b' :: 'a' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
 }
