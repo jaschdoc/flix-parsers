@@ -73,6 +73,15 @@ namespace Parser {
         ) yield ((x1, x2), rest2)
 
     ///
+    /// Returns the result of applying `f` to every element of
+    /// the `ParseResult` of `p` on `input`.
+    ///
+    pub def using(p: Parser[a, b], f: a -> c, input: Input[b]): ParseResult[c, b] =
+        for (
+            (x, rest) <- p(input)
+        ) yield (f(x), rest)
+
+    ///
     /// Returns the string `s` as an `Input` type.
     ///
     pub def inputFromString(s: String): Input[Char] =
