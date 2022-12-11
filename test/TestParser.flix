@@ -881,13 +881,28 @@ namespace TestParser {
     ////////////////////////////////////////////////////////////////////////
     // Stringify                                                          //
     ////////////////////////////////////////////////////////////////////////
-/* This test loops?
+
     @test
     def stringify01(): Bool =
+        let input = input("");
+        let actual = stringify(input);
+        let expected = "";
+        Assert.eq(expected, actual)
+
+    @test
+    def stringify02(): Bool =
         let input = input("aaab");
-        let actual = input |> many(literal('a'));
-        let expected = "aaa" :: "aa" :: "a" :: Nil;
-        Assert.eq(expected, stringify(actual))
-*/
+        let actual = stringify(input);
+        let expected = "aaab";
+        Assert.eq(expected, actual)
+
+    @test
+    def stringify03(): Bool =
+        let input = input("12345");
+        let actual = number(input)
+            |> List.head
+            |> Option.map(fst >> stringify);
+        let expected = Some("12345");
+        Assert.eq(expected, actual)
 
 }

@@ -173,15 +173,14 @@ namespace Parser {
         String.toList(s)
 
     ///
-    /// Returns for each succesful result in `res` the concatenation of the result as a string.
+    /// Returns `chars` as a string.
     ///
-    pub def stringify(res: ParseResult[List[Char], b]): List[String] =
-        let str = chars -> region r {
-            let sb = new StringBuilder(r);
-            foreach (c <- iterator(r, chars)) StringBuilder.append!(c, sb);
-            StringBuilder.toString(sb)
-        };
-        res |> List.map(fst) |> List.map(str)
+    pub def stringify(chars: List[Char]): String = region r {
+        use Foldable.iterator;
+        let sb = new StringBuilder(r);
+        foreach (c <- iterator(r, chars)) StringBuilder.append!(c, sb);
+        StringBuilder.toString(sb)
+    }
 
     ///
     /// Returns the tuple as a list, i.e.
