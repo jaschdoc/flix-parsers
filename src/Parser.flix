@@ -167,6 +167,26 @@ namespace Parser {
         (String.toList >> literalSequence)(s, input)
 
     ///
+    /// Returns a `ParseResult` where white-space
+    /// has been removed on both sides of `p`.
+    ///
+    pub def nibble(p: Parser[a, Char], input: Input[Char]): ParseResult[a, Char] =
+        input |> (whitespace `thenIgnoringLeft` p `thenIgnoringRight` whitespace)
+
+    ///
+    /// Returns a `ParseResult` that recognizes whitespace.
+    ///
+    pub def whitespace(input: Input[Char]): ParseResult[List[Char], Char] =
+        let chars = String.toList(" \t\n");
+        input |> (many(any(literal, chars)))
+
+    ///
+    /// Returns a `ParseResult` that recognizes any of the elements in `syms`.
+    ///
+    pub def any(f: a -> Parser[b, c], syms: List[a], input: Input[c]): ParseResult[b, c] =
+        input |> List.foldRight(f >> otherwise, fail, syms)
+
+    ///
     /// Returns the string `s` as an `Input` type.
     ///
     pub def input(s: String): Input[Char] =
