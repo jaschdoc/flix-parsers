@@ -959,4 +959,13 @@ namespace TestParser {
         let expected = ('a' :: 'a' :: 'a' :: Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
+    @test
+    def nibble07(): Bool =
+        let input = fromString("    Hello   world!");
+        let actual = input |> (nibble(string("Hello")))
+            |> List.head
+            |> Option.map(match (a, b) -> (stringify(a), stringify(b)));
+        let expected = Some("Hello", "world!");
+        Assert.eq(expected, actual)
+
 }
