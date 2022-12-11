@@ -60,7 +60,7 @@ namespace Parser {
     /// Returns the result of parser `p1` applied to `input`
     /// followed by the result of parser `p2` applied to `input`.
     ///
-    pub def append(p1: Parser[a, b], p2: Parser[a, b], input: Input[b]): ParseResult[a, b] =
+    pub def either(p1: Parser[a, b], p2: Parser[a, b], input: Input[b]): ParseResult[a, b] =
         p1(input) ::: p2(input)
 
     ///
@@ -97,7 +97,7 @@ namespace Parser {
     ///
     pub def many(p: Parser[a, b], input: Input[b]): ParseResult[List[a], b] =
         let p1 = (p `then` many(p)) `using` cons;
-        append(p1, succeed(Nil), input)
+        either(p1, succeed(Nil), input)
 
     ///
     /// Returns one or more results of the parser `p`.
