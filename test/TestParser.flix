@@ -16,7 +16,7 @@
 
 namespace TestParser {
 
-    use Parser.{succeed, fail, literal, either,
+    use Parser.{succeed, fail, literal, otherwise,
                 then, thenIgnoringLeft,
                 thenIgnoringRight, using, many,
                 some, number, word, input, stringify,
@@ -166,115 +166,115 @@ namespace TestParser {
 
 
     ////////////////////////////////////////////////////////////////////////
-    // either                                                             //
+    // Otherwise                                                          //
     ////////////////////////////////////////////////////////////////////////
 
     @test
-    def either01(): Bool =
+    def otherwise01(): Bool =
         let input = noInput();
-        let actual = either(literal('a'), literal('b'), input);
+        let actual = otherwise(literal('a'), literal('b'), input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either02(): Bool =
+    def otherwise02(): Bool =
         let input = input("a");
-        let actual = either(literal('a'), literal('b'), input);
+        let actual = otherwise(literal('a'), literal('b'), input);
         let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either03(): Bool =
+    def otherwise03(): Bool =
         let input = "a" :: "b" :: Nil;
-        let actual = either(literal("a"), literal("b"), input);
+        let actual = otherwise(literal("a"), literal("b"), input);
         let expected = ("a", "b" :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either04(): Bool =
+    def otherwise04(): Bool =
         let input = "a" :: "b" :: Nil;
-        let actual = either(literal("a"), literal("a"), input);
+        let actual = otherwise(literal("a"), literal("a"), input);
         let expected = ("a", "b" :: Nil) :: ("a", "b" :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either05(): Bool =
+    def otherwise05(): Bool =
         let input = "b" :: "a" :: Nil;
-        let actual = either(literal("a"), literal("b"), input);
+        let actual = otherwise(literal("a"), literal("b"), input);
         let expected = ("b", "a" :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either06(): Bool =
+    def otherwise06(): Bool =
         let input = "b" :: "b" :: Nil;
-        let actual = either(literal("a"), literal("b"), input);
+        let actual = otherwise(literal("a"), literal("b"), input);
         let expected = ("b", "b" :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either07(): Bool =
+    def otherwise07(): Bool =
         let input = "b" :: "c" :: Nil;
-        let actual = either(literal("b"), literal("b"), input);
+        let actual = otherwise(literal("b"), literal("b"), input);
         let expected = ("b", "c" :: Nil) :: ("b", "c" :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either08(): Bool =
+    def otherwise08(): Bool =
         let input = input("c");
-        let actual = either(literal('a'), literal('b'), input);
+        let actual = otherwise(literal('a'), literal('b'), input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either09(): Bool =
+    def otherwise09(): Bool =
         let input = noInput();
-        let actual = either(succeed("1"), succeed("2"), input);
+        let actual = otherwise(succeed("1"), succeed("2"), input);
         let expected = ("1", Nil) :: ("2", Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either10(): Bool =
+    def otherwise10(): Bool =
         let input = "a" :: "b" :: "c" :: Nil;
-        let actual = either(succeed("1"), succeed("2"), input);
+        let actual = otherwise(succeed("1"), succeed("2"), input);
         let expected = ("1", "a" :: "b" :: "c" :: Nil) :: ("2", "a" :: "b" :: "c" :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either11(): Bool =
+    def otherwise11(): Bool =
         let input = "a" :: "b" :: "c" :: Nil;
-        let actual = either(succeed("1"), fail, input);
+        let actual = otherwise(succeed("1"), fail, input);
         let expected = ("1", "a" :: "b" :: "c" :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either12(): Bool =
+    def otherwise12(): Bool =
         let input = "a" :: "b" :: "c" :: Nil;
-        let actual = either(fail, succeed("1"), input);
+        let actual = otherwise(fail, succeed("1"), input);
         let expected = ("1", "a" :: "b" :: "c" :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either13(): Bool =
+    def otherwise13(): Bool =
         let input = "a" :: "b" :: "c" :: Nil;
-        let actual: ParseResult[String, String] = either(fail, fail, input);
+        let actual: ParseResult[String, String] = otherwise(fail, fail, input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
     // Associativity
 
     @test
-    def either14(): Bool =
+    def otherwise14(): Bool =
         let input = noInput();
-        let p1 = either(succeed("a"), succeed("b"));
-        let actual = either(p1, succeed("c"), input);
+        let p1 = otherwise(succeed("a"), succeed("b"));
+        let actual = otherwise(p1, succeed("c"), input);
         let expected = ("a", Nil) :: ("b", Nil) :: ("c", Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
-    def either15(): Bool =
+    def otherwise15(): Bool =
         let input = noInput();
-        let p2 = either(succeed("b"), succeed("c"));
-        let actual = either(succeed("a"), p2, input);
+        let p2 = otherwise(succeed("b"), succeed("c"));
+        let actual = otherwise(succeed("a"), p2, input);
         let expected = ("a", Nil) :: ("b", Nil) :: ("c", Nil) :: Nil;
         Assert.eq(expected, actual)
 
