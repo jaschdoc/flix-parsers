@@ -42,52 +42,52 @@ namespace TestArith {
 
     namespace ArithParser {
         use Parser.{number, literal, using, otherwise, then, thenIgnoringLeft, thenIgnoringRight};
-        use TestArith.Exp;
+        use TestArith.{Exp => AExp};
 
-        pub def parse(s: String): Option[Exp] =
-            Parser.input(s) |> expn |> List.head |> Option.map(fst)
+        pub def parse(s: String): Option[AExp] =
+            Parser.fromString(s) |> expn |> List.head |> Option.map(fst)
 
         // Each production rule ends with ... `using` func, where func is a function
         // that produces the corresponding AST node.
 
-        def expn(input: List[Char]): ParseResult[Exp, Char] = input |> (
+        def expn(input: List[Char]): ParseResult[AExp, Char] = input |> (
             ((term `then` (literal('+') `thenIgnoringLeft` term)) `using` plus)  `otherwise`
             ((term `then` (literal('-') `thenIgnoringLeft` term)) `using` minus) `otherwise`
             term
         )
 
-        def term(input: List[Char]): ParseResult[Exp, Char] = input |> (
+        def term(input: List[Char]): ParseResult[AExp, Char] = input |> (
             ((factor `then` (literal('*') `thenIgnoringLeft` factor)) `using` times)  `otherwise`
             ((factor `then` (literal('/') `thenIgnoringLeft` factor)) `using` divide) `otherwise`
             factor
         )
 
-        def factor(input: List[Char]): ParseResult[Exp, Char] = input |> (
+        def factor(input: List[Char]): ParseResult[AExp, Char] = input |> (
             (number `using` value) `otherwise`
             (literal('(') `thenIgnoringLeft` expn `thenIgnoringRight` literal(')'))
         )
 
-        def value(nums: List[Char]): Exp =
+        def value(nums: List[Char]): AExp =
             let optInt = Parser.stringify(nums) |> Int32.fromString;
             match optInt {
-                case Some(n) => Exp.Num(n)
+                case Some(n) => AExp.Num(n)
                 case None    => unreachable!()
             }
 
-        def plus(exp: (Exp, Exp)): Exp = match exp {
-            case (left, right) => Exp.Add(left, right)
+        def plus(exp: (AExp, AExp)): AExp = match exp {
+            case (left, right) => AExp.Add(left, right)
         }
 
-        def minus(exp: (Exp, Exp)): Exp = match exp {
-            case (left, right) => Exp.Sub(left, right)
+        def minus(exp: (AExp, AExp)): AExp = match exp {
+            case (left, right) => AExp.Sub(left, right)
         }
 
-        def times(exp: (Exp, Exp)): Exp = match exp {
-            case (left, right) => Exp.Mul(left, right)
+        def times(exp: (AExp, AExp)): AExp = match exp {
+            case (left, right) => AExp.Mul(left, right)
         }
 
-        def divide(exp: (Exp, Exp)): Exp = match exp {
-            case (left, right) => Exp.Div(left, right)
+        def divide(exp: (AExp, AExp)): AExp = match exp {
+            case (left, right) => AExp.Div(left, right)
         }
     }
 
