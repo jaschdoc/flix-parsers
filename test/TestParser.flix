@@ -16,7 +16,7 @@
 
 namespace TestParser {
 
-    use Parser.{succeed, fail, literal, append, then, using, many};
+    use Parser.{succeed, fail, literal, append, then, using, many, some};
 
     // Helper functions
 
@@ -415,6 +415,50 @@ namespace TestParser {
             ('a' :: Nil, 'a' :: 'a' :: 'b' :: Nil) ::
             (Nil, 'a' :: 'a' :: 'a' :: 'b' :: Nil) ::
             Nil;
+        Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Some                                                               //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def some01(): Bool =
+        let input = noInput();
+        let actual = input |> some(literal('a'));
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def some02(): Bool =
+        let input = input("b");
+        let actual = input |> some(literal('a'));
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def some03(): Bool =
+        let input = input("ab");
+        let actual = input |> some(literal('a'));
+        let expected = ('a' :: Nil, 'b' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def some04(): Bool =
+        let input = input("aaab");
+        let actual = input |> some(literal('a'));
+        let expected =
+            ('a' :: 'a' :: 'a' :: Nil, 'b' :: Nil) ::
+            ('a' :: 'a' :: Nil, 'a' :: 'b' :: Nil) ::
+            ('a' :: Nil, 'a' :: 'a' :: 'b' :: Nil) ::
+            Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def some05(): Bool =
+        let input = input("baaa");
+        let actual = input |> some(literal('a'));
+        let expected = Nil;
         Assert.eq(expected, actual)
 
 }
