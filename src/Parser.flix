@@ -100,6 +100,17 @@ namespace Parser {
         append(p1, succeed(Nil), input)
 
     ///
+    /// Returns one or more results of the parser `p`.
+    ///
+    /// Note that unlike `many`, this parser may fail, i.e.
+    /// returning 0 results.
+    ///
+    /// Equivalent to `A+`.
+    ///
+    pub def some(p: Parser[a, b], input: Input[b]): ParseResult[List[a], b] =
+        ((p `then` many(p)) `using` cons)(input)
+
+    ///
     /// Returns the string `s` as an `Input` type.
     ///
     pub def inputFromString(s: String): Input[Char] =
