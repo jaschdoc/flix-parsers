@@ -925,14 +925,14 @@ namespace TestParser {
 
     @test
     def nibble03(): Bool =
-        let input = fromString("");                          // `succeed` yields whatever
+        let input = fromString("");                     // `succeed` yields whatever
         let actual = input |> (nibble(succeed("   "))); // it's passed regardless of
         let expected = ("   ", Nil) :: Nil;             // any function that processes the input
         Assert.eq(expected, actual)
 
     @test
     def nibble04(): Bool =
-        let input = fromString("");                             // `succeed` yields whatever
+        let input = fromString("");                        // `succeed` yields whatever
         let actual = input |> (nibble(succeed("  abc "))); // it's passed regardless of
         let expected = ("  abc ", Nil) :: Nil;             // any function that processes the input
         Assert.eq(expected, actual)
