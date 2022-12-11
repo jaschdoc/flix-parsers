@@ -189,7 +189,7 @@ namespace Parser {
     ///
     /// Returns the string `s` as an `Input` type.
     ///
-    pub def input(s: String): Input[Char] =
+    pub def fromString(s: String): Input[Char] =
         String.toList(s)
 
     ///

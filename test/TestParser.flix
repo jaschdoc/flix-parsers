@@ -19,7 +19,7 @@ namespace TestParser {
     use Parser.{succeed, fail, literal, otherwise,
                 then, thenIgnoringLeft, nibble,
                 thenIgnoringRight, using, many,
-                some, number, word, input, stringify,
+                some, number, word, fromString, stringify,
                 literalSequence, string, return};
 
     // Helper functions
@@ -46,7 +46,7 @@ namespace TestParser {
 
     @test
     def succeed03(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = succeed("a", input);
         let expected = ("a", input) :: Nil;
         Assert.eq(expected, actual)
@@ -72,7 +72,7 @@ namespace TestParser {
 
     @test
     def fail03(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual: ParseResult[String, Char] = fail(input);
         let expected = Nil;
         Assert.eq(expected, actual)
@@ -98,7 +98,7 @@ namespace TestParser {
 
     @test
     def satisfy02(): Bool =
-        let input = input("a");
+        let input = fromString("a");
         let actual = Parser.satisfy(a -> a == 'a', input);
         let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
@@ -138,7 +138,7 @@ namespace TestParser {
 
     @test
     def literal02(): Bool =
-        let input = input("a");
+        let input = fromString("a");
         let actual = literal('a', input);
         let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
@@ -178,7 +178,7 @@ namespace TestParser {
 
     @test
     def otherwise02(): Bool =
-        let input = input("a");
+        let input = fromString("a");
         let actual = otherwise(literal('a'), literal('b'), input);
         let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
@@ -220,7 +220,7 @@ namespace TestParser {
 
     @test
     def otherwise08(): Bool =
-        let input = input("c");
+        let input = fromString("c");
         let actual = otherwise(literal('a'), literal('b'), input);
         let expected = Nil;
         Assert.eq(expected, actual)
@@ -313,35 +313,35 @@ namespace TestParser {
 
     @test
     def then05(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `then` literal('b'));
         let expected = (('a', 'b'), 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def then06(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('b') `then` literal('a'));
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def then07(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `then` literal('c'));
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def then08(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `then` literal('b') `then` literal('c'));
         let expected = ((('a', 'b'), 'c'), Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def then09(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `then` (literal('b') `then` literal('c')));
         let expected = (('a', ('b', 'c')), Nil) :: Nil;
         Assert.eq(expected, actual)
@@ -381,63 +381,63 @@ namespace TestParser {
 
     @test
     def thenIgnoringLeft05(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringLeft` literal('b'));
         let expected = ('b', 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringLeft06(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('b') `thenIgnoringLeft` literal('a'));
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringLeft07(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringLeft` literal('c'));
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringLeft08(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringLeft` literal('b') `thenIgnoringLeft` literal('c'));
         let expected = ('c', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringLeft09(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringLeft` (literal('b') `thenIgnoringLeft` literal('c')));
         let expected = ('c', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringLeft10(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `then` literal('b') `thenIgnoringLeft` literal('c'));
         let expected = ('c', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringLeft11(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `then` (literal('b') `thenIgnoringLeft` literal('c')));
         let expected = (('a', 'c'), Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringLeft12(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringLeft` literal('b') `then` literal('c'));
         let expected = (('b', 'c'), Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringLeft13(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringLeft` (literal('b') `then` literal('c')));
         let expected = (('b', 'c'), Nil) :: Nil;
         Assert.eq(expected, actual)
@@ -477,63 +477,63 @@ namespace TestParser {
 
     @test
     def thenIgnoringRight05(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringRight` literal('b'));
         let expected = ('a', 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringRight06(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('b') `thenIgnoringRight` literal('a'));
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringRight07(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringRight` literal('c'));
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringRight08(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringRight` literal('b') `thenIgnoringRight` literal('c'));
         let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringRight09(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringRight` (literal('b') `thenIgnoringRight` literal('c')));
         let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringRight10(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `then` literal('b') `thenIgnoringRight` literal('c'));
         let expected = (('a', 'b'), Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringRight11(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `then` (literal('b') `thenIgnoringRight` literal('c')));
         let expected = (('a', 'b'), Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringRight12(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringRight` literal('b') `then` literal('c'));
         let expected = (('a', 'c'), Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def thenIgnoringRight13(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (literal('a') `thenIgnoringRight` (literal('b') `then` literal('c')));
         let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
@@ -559,7 +559,7 @@ namespace TestParser {
 
     @test
     def using03(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let f = c -> if (c == 'c') 1 else 0;
         let actual = input |> (literal('a') `using` f);
         let expected = (0, 'b' :: 'c' :: Nil) :: Nil;
@@ -567,7 +567,7 @@ namespace TestParser {
 
     @test
     def using04(): Bool =
-        let input = input("cba");
+        let input = fromString("cba");
         let f = c -> if (c == 'c') 1 else 0;
         let actual = input |> (literal('c') `using` f);
         let expected = (1, 'b' :: 'a' :: Nil) :: Nil;
@@ -587,21 +587,21 @@ namespace TestParser {
 
     @test
     def many02(): Bool =
-        let input = input("b");
+        let input = fromString("b");
         let actual = input |> many(literal('a'));
         let expected = (Nil, 'b' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def many03(): Bool =
-        let input = input("ab");
+        let input = fromString("ab");
         let actual = input |> many(literal('a'));
         let expected = ('a' :: Nil, 'b' :: Nil) :: (Nil, 'a' :: 'b' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def many04(): Bool =
-        let input = input("aaab");
+        let input = fromString("aaab");
         let actual = input |> many(literal('a'));
         let expected =
             ('a' :: 'a' :: 'a' :: Nil, 'b' :: Nil) ::
@@ -625,21 +625,21 @@ namespace TestParser {
 
     @test
     def some02(): Bool =
-        let input = input("b");
+        let input = fromString("b");
         let actual = input |> some(literal('a'));
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def some03(): Bool =
-        let input = input("ab");
+        let input = fromString("ab");
         let actual = input |> some(literal('a'));
         let expected = ('a' :: Nil, 'b' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def some04(): Bool =
-        let input = input("aaab");
+        let input = fromString("aaab");
         let actual = input |> some(literal('a'));
         let expected =
             ('a' :: 'a' :: 'a' :: Nil, 'b' :: Nil) ::
@@ -650,7 +650,7 @@ namespace TestParser {
 
     @test
     def some05(): Bool =
-        let input = input("baaa");
+        let input = fromString("baaa");
         let actual = input |> some(literal('a'));
         let expected = Nil;
         Assert.eq(expected, actual)
@@ -669,14 +669,14 @@ namespace TestParser {
 
     @test
     def number02(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = number(input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def number03(): Bool =
-        let input = input("1 big apple");
+        let input = fromString("1 big apple");
         let rest = String.toList(" big apple");
         let actual = number(input);
         let expected = ('1' :: Nil, rest) :: Nil;
@@ -684,7 +684,7 @@ namespace TestParser {
 
     @test
     def number04(): Bool =
-        let input = input("123 big apple");
+        let input = fromString("123 big apple");
         let rest = String.toList(" big apple");
         let actual = number(input);
         let expected =
@@ -708,7 +708,7 @@ namespace TestParser {
 
     @test
     def word02(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = word(input);
         let expected =
             ('a' :: 'b' :: 'c' :: Nil, Nil) ::
@@ -719,14 +719,14 @@ namespace TestParser {
 
     @test
     def word03(): Bool =
-        let input = input("1 big apple");
+        let input = fromString("1 big apple");
         let actual = word(input);
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def word04(): Bool =
-        let input = input("big 123 apple");
+        let input = fromString("big 123 apple");
         let rest = String.toList(" 123 apple");
         let actual = word(input);
         let expected =
@@ -750,28 +750,28 @@ namespace TestParser {
 
     @test
     def literalSequence02(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = literalSequence(Nil, input);
         let expected = (Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def literalSequence03(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = literalSequence('a' :: 'b' :: Nil, input);
         let expected = ('a' :: 'b' :: Nil, 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def literalSequence04(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = literalSequence('a' :: 'b' :: 'c' :: Nil, input);
         let expected = ('a' :: 'b' :: 'c' :: Nil, Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def literalSequence05(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = literalSequence('b' :: 'a' :: Nil, input);
         let expected = Nil;
         Assert.eq(expected, actual)
@@ -790,28 +790,28 @@ namespace TestParser {
 
     @test
     def string02(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = string("", input);
         let expected = (Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def string03(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = string("ab", input);
         let expected = ('a' :: 'b' :: Nil, 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def string04(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = string("abc", input);
         let expected = ('a' :: 'b' :: 'c' :: Nil, Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def string05(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = string("ba", input);
         let expected = Nil;
         Assert.eq(expected, actual)
@@ -837,42 +837,42 @@ namespace TestParser {
 
     @test
     def return03(): Bool =
-        let input = input("");
+        let input = fromString("");
         let actual = input |> (string("") `return` "");
         let expected = ("", Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def return04(): Bool =
-        let input = input("");
+        let input = fromString("");
         let actual = input |> (string("") `return` 'a');
         let expected = ('a', Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def return05(): Bool =
-        let input = input("");
+        let input = fromString("");
         let actual = input |> (string("") `return` 1);
         let expected = (1, Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def return06(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (string("") `return` 1);
         let expected = (1, 'a' :: 'b' :: 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def return07(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (string("ab") `return` 1);
         let expected = (1, 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def return08(): Bool =
-        let input = input("abc");
+        let input = fromString("abc");
         let actual = input |> (string("ab") `return` "");
         let expected = ("", 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
@@ -884,21 +884,21 @@ namespace TestParser {
 
     @test
     def stringify01(): Bool =
-        let input = input("");
+        let input = fromString("");
         let actual = stringify(input);
         let expected = "";
         Assert.eq(expected, actual)
 
     @test
     def stringify02(): Bool =
-        let input = input("aaab");
+        let input = fromString("aaab");
         let actual = stringify(input);
         let expected = "aaab";
         Assert.eq(expected, actual)
 
     @test
     def stringify03(): Bool =
-        let input = input("12345");
+        let input = fromString("12345");
         let actual = number(input)
             |> List.head
             |> Option.map(fst >> stringify);
@@ -911,35 +911,35 @@ namespace TestParser {
 
     @test
     def nibble01(): Bool =
-        let input = input("");
+        let input = fromString("");
         let actual: ParseResult[Char, Char] = input |> (nibble(fail));
         let expected = Nil;
         Assert.eq(expected, actual)
 
     @test
     def nibble02(): Bool =
-        let input = input("");
+        let input = fromString("");
         let actual = input |> (nibble(succeed("")));
         let expected = ("", Nil) :: Nil;
         Assert.eq(expected, actual)
 
     @test
     def nibble03(): Bool =
-        let input = input("");                          // `succeed` yields whatever
+        let input = fromString("");                          // `succeed` yields whatever
         let actual = input |> (nibble(succeed("   "))); // it's passed regardless of
         let expected = ("   ", Nil) :: Nil;             // any function that processes the input
         Assert.eq(expected, actual)
 
     @test
     def nibble04(): Bool =
-        let input = input("");                             // `succeed` yields whatever
+        let input = fromString("");                             // `succeed` yields whatever
         let actual = input |> (nibble(succeed("  abc "))); // it's passed regardless of
         let expected = ("  abc ", Nil) :: Nil;             // any function that processes the input
         Assert.eq(expected, actual)
 
     @test
     def nibble05(): Bool =
-        let input = input("    aaa      ");
+        let input = fromString("    aaa      ");
         let actual = input |> (nibble(string("aaa")));
         let expected =
             ('a' :: 'a' :: 'a' :: Nil, Nil) ::
@@ -954,7 +954,7 @@ namespace TestParser {
 
     @test
     def nibble06(): Bool =
-        let input = input("    aaaabc");
+        let input = fromString("    aaaabc");
         let actual = input |> (nibble(string("aaa")));
         let expected = ('a' :: 'a' :: 'a' :: Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
