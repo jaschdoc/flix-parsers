@@ -129,6 +129,27 @@ namespace Parser {
         input |> some(satisfy(letter))
 
     ///
+    ///
+    ///
+    pub def literalSequence(lit: List[a], input: Input[a]): ParseResult[List[a], a] with Eq[a] =
+        let p = match lit {
+            case Nil     => succeed(Nil)
+            case x :: xs => (literal(x) `then` (literalSequence(xs))) `using` cons
+        };
+        p(input)
+
+    ///
+    ///
+    ///
+    pub def string(s: String, input: Input[Char]): ParseResult[String, Char] =
+        let f = match (cs, xs) -> region r {
+            let sb = new StringBuilder(r);
+            foreach (c <- iterator(r, cs)) StringBuilder.append!(c, sb);
+            (StringBuilder.toString(sb), xs)
+        };
+        literalSequence(String.toList(s), input) |> List.map(f)
+
+    ///
     /// Returns the string `s` as an `Input` type.
     ///
     pub def inputFromString(s: String): Input[Char] =
