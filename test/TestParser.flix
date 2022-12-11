@@ -17,7 +17,7 @@
 namespace TestParser {
 
     use Parser.{succeed, fail, literal, otherwise,
-                then, thenIgnoringLeft,
+                then, thenIgnoringLeft, nibble,
                 thenIgnoringRight, using, many,
                 some, number, word, input, stringify,
                 literalSequence, string, return};
@@ -903,6 +903,52 @@ namespace TestParser {
             |> List.head
             |> Option.map(fst >> stringify);
         let expected = Some("12345");
+        Assert.eq(expected, actual)
+
+    ////////////////////////////////////////////////////////////////////////
+    // Nibble                                                             //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def nibble01(): Bool =
+        let input = input("");
+        let actual: ParseResult[Char, Char] = input |> (nibble(fail));
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def nibble02(): Bool =
+        let input = input("");
+        let actual = input |> (nibble(succeed("")));
+        let expected = ("", Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def nibble03(): Bool =
+        let input = input("");                          // `succeed` yields whatever
+        let actual = input |> (nibble(succeed("   "))); // it's passed regardless of
+        let expected = ("   ", Nil) :: Nil;             // any function that processes the input
+        Assert.eq(expected, actual)
+
+    @test
+    def nibble04(): Bool =
+        let input = input("");                             // `succeed` yields whatever
+        let actual = input |> (nibble(succeed("  abc "))); // it's passed regardless of
+        let expected = ("  abc ", Nil) :: Nil;             // any function that processes the input
+        Assert.eq(expected, actual)
+
+    @test
+    def nibble05(): Bool =
+        let input = input("    aaa      ");
+        let actual = input |> (nibble(string("aaa")));
+        let expected = ('a' :: 'a' :: 'a' :: Nil, Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def nibble06(): Bool =
+        let input = input("    aaaabc");
+        let actual = input |> (nibble(string("aaa")));
+        let expected = ('a' :: 'a' :: 'a' :: Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
 }
