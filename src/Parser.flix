@@ -129,7 +129,8 @@ namespace Parser {
         input |> some(satisfy(letter))
 
     ///
-    ///
+    /// Returns a `ParseResult` that recognizes the sequence `lit`.
+    /// This is generalization of `literal`.
     ///
     pub def literalSequence(lit: List[a], input: Input[a]): ParseResult[List[a], a] with Eq[a] =
         let p = match lit {
@@ -139,15 +140,10 @@ namespace Parser {
         p(input)
 
     ///
+    /// Returns a `ParseResult` that recognizes the string `s`.
     ///
-    ///
-    pub def string(s: String, input: Input[Char]): ParseResult[String, Char] =
-        let f = match (cs, xs) -> region r {
-            let sb = new StringBuilder(r);
-            foreach (c <- iterator(r, cs)) StringBuilder.append!(c, sb);
-            (StringBuilder.toString(sb), xs)
-        };
-        literalSequence(String.toList(s), input) |> List.map(f)
+    pub def string(s: String, input: Input[Char]): ParseResult[List[Char], Char] =
+        (String.toList >> literalSequence)(s, input)
 
     ///
     /// Returns the string `s` as an `Input` type.

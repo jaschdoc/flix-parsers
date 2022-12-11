@@ -18,7 +18,7 @@ namespace TestParser {
 
     use Parser.{succeed, fail, literal, either,
                 then, using, many, some, number,
-                word};
+                word, literalSequence, string};
 
     // Helper functions
 
@@ -542,6 +542,86 @@ namespace TestParser {
             ('b' :: 'i' :: Nil, 'g' :: rest) ::
             ('b' :: Nil, 'i' :: 'g' :: rest) ::
             Nil;
+        Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // LiteralSequence                                                    //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def literalSequence01(): Bool =
+        let input = noInput();
+        let actual = literalSequence(Nil, input);
+        let expected = (Nil, Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def literalSequence02(): Bool =
+        let input = input("abc");
+        let actual = literalSequence(Nil, input);
+        let expected = (Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def literalSequence03(): Bool =
+        let input = input("abc");
+        let actual = literalSequence('a' :: 'b' :: Nil, input);
+        let expected = ('a' :: 'b' :: Nil, 'c' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def literalSequence04(): Bool =
+        let input = input("abc");
+        let actual = literalSequence('a' :: 'b' :: 'c' :: Nil, input);
+        let expected = ('a' :: 'b' :: 'c' :: Nil, Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def literalSequence05(): Bool =
+        let input = input("abc");
+        let actual = literalSequence('b' :: 'a' :: Nil, input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // String                                                             //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def string01(): Bool =
+        let input = noInput();
+        let actual = string("", input);
+        let expected = (Nil, Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def string02(): Bool =
+        let input = input("abc");
+        let actual = string("", input);
+        let expected = (Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def string03(): Bool =
+        let input = input("abc");
+        let actual = string("ab", input);
+        let expected = ('a' :: 'b' :: Nil, 'c' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def string04(): Bool =
+        let input = input("abc");
+        let actual = string("abc", input);
+        let expected = ('a' :: 'b' :: 'c' :: Nil, Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def string05(): Bool =
+        let input = input("abc");
+        let actual = string("ba", input);
+        let expected = Nil;
         Assert.eq(expected, actual)
 
 }
