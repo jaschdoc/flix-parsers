@@ -119,6 +119,16 @@ namespace Parser {
         input |> some(satisfy(digit))
 
     ///
+    /// Returns one or more `ParseResults` recognizing consecutive chars.
+    /// The longest match will be the first result.
+    ///
+    pub def word(input: Input[Char]): ParseResult[List[Char], Char] =
+        let lowercase = c -> 'a' <= c and c <= 'z';
+        let uppercase = c -> 'A' <= c and c <= 'Z';
+        let letter = c -> lowercase(c) or uppercase(c);
+        input |> some(satisfy(letter))
+
+    ///
     /// Returns the string `s` as an `Input` type.
     ///
     pub def inputFromString(s: String): Input[Char] =

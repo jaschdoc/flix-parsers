@@ -17,7 +17,8 @@
 namespace TestParser {
 
     use Parser.{succeed, fail, literal, either,
-                then, using, many, some, number};
+                then, using, many, some, number,
+                word};
 
     // Helper functions
 
@@ -498,6 +499,48 @@ namespace TestParser {
             ('1' :: '2' :: '3' :: Nil, rest) ::
             ('1' :: '2' :: Nil, '3' :: rest) ::
             ('1' :: Nil, '2' :: '3' :: rest) ::
+            Nil;
+        Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Word                                                               //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def word01(): Bool =
+        let input = noInput();
+        let actual = word(input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def word02(): Bool =
+        let input = input("abc");
+        let actual = word(input);
+        let expected =
+            ('a' :: 'b' :: 'c' :: Nil, Nil) ::
+            ('a' :: 'b' :: Nil, 'c' :: Nil) ::
+            ('a' :: Nil, 'b' :: 'c' :: Nil) ::
+            Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def word03(): Bool =
+        let input = input("1 big apple");
+        let actual = word(input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def word04(): Bool =
+        let input = input("big 123 apple");
+        let rest = String.toList(" 123 apple");
+        let actual = word(input);
+        let expected =
+            ('b' :: 'i' :: 'g' :: Nil, rest) ::
+            ('b' :: 'i' :: Nil, 'g' :: rest) ::
+            ('b' :: Nil, 'i' :: 'g' :: rest) ::
             Nil;
         Assert.eq(expected, actual)
 
