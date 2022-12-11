@@ -447,6 +447,102 @@ namespace TestParser {
 
 
     ////////////////////////////////////////////////////////////////////////
+    // ThenIgnoringRight                                                  //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def thenIgnoringRight01(): Bool =
+        let input = noInput();
+        let actual: ParseResult[Char, Char] = input |> (fail `thenIgnoringRight` fail);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight02(): Bool =
+        let input = noInput();
+        let actual: ParseResult[Char, Char] = input |> (fail `thenIgnoringRight` succeed('a'));
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight03(): Bool =
+        let input = noInput();
+        let actual: ParseResult[Char, Char] = input |> (succeed('a') `thenIgnoringRight` fail);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight04(): Bool =
+        let input = noInput();
+        let actual = input |> (succeed('a') `thenIgnoringRight` succeed('b'));
+        let expected = ('a', Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight05(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `thenIgnoringRight` literal('b'));
+        let expected = ('a', 'c' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight06(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('b') `thenIgnoringRight` literal('a'));
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight07(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `thenIgnoringRight` literal('c'));
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight08(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `thenIgnoringRight` literal('b') `thenIgnoringRight` literal('c'));
+        let expected = ('a', Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight09(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `thenIgnoringRight` (literal('b') `thenIgnoringRight` literal('c')));
+        let expected = ('a', Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight10(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `then` literal('b') `thenIgnoringRight` literal('c'));
+        let expected = (('a', 'b'), Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight11(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `then` (literal('b') `thenIgnoringRight` literal('c')));
+        let expected = (('a', 'b'), Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight12(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `thenIgnoringRight` literal('b') `then` literal('c'));
+        let expected = (('a', 'c'), Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def thenIgnoringRight13(): Bool =
+        let input = input("abc");
+        let actual = input |> (literal('a') `thenIgnoringRight` (literal('b') `then` literal('c')));
+        let expected = ('a', Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
     // Using                                                              //
     ////////////////////////////////////////////////////////////////////////
 
