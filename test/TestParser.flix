@@ -16,13 +16,14 @@
 
 namespace TestParser {
 
-    use Parser.{succeed, fail, literal, either, then, using, many, some};
+    use Parser.{succeed, fail, literal, either,
+                then, using, many, some, number};
 
     // Helper functions
 
-    def noInput(): List[Char] = Nil
+    def noInput(): Input[Char] = Nil
 
-    def input(s: String): List[Char] =
+    def input(s: String): Input[Char] =
         Parser.inputFromString(s)
 
     ////////////////////////////////////////////////////////////////////////
@@ -459,6 +460,45 @@ namespace TestParser {
         let input = input("baaa");
         let actual = input |> some(literal('a'));
         let expected = Nil;
+        Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Number                                                             //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def number01(): Bool =
+        let input = noInput();
+        let actual = number(input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def number02(): Bool =
+        let input = input("abc");
+        let actual = number(input);
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def number03(): Bool =
+        let input = input("1 big apple");
+        let rest = String.toList(" big apple");
+        let actual = number(input);
+        let expected = ('1' :: Nil, rest) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def number04(): Bool =
+        let input = input("123 big apple");
+        let rest = String.toList(" big apple");
+        let actual = number(input);
+        let expected =
+            ('1' :: '2' :: '3' :: Nil, rest) ::
+            ('1' :: '2' :: Nil, '3' :: rest) ::
+            ('1' :: Nil, '2' :: '3' :: rest) ::
+            Nil;
         Assert.eq(expected, actual)
 
 }
