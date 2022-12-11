@@ -77,6 +77,20 @@ namespace Parser {
         ) yield ((x1, x2), rest2)
 
     ///
+    /// Returns a `ParseResult` that recognizes the concatenation of `p1` and `p2`
+    /// but discards the result of `p1`.
+    ///
+    pub def thenIgnoringLeft(p1: Parser[a, b], p2: Parser[c, b], input: Input[b]): ParseResult[c, b] =
+        input |> ((p1 `then` p2) `using` snd)
+
+    ///
+    /// Returns a `ParseResult` that recognizes the concatenation of `p1` and `p2`
+    /// but discards the result of `p2`.
+    ///
+    pub def thenIgnoringRight(p1: Parser[a, b], p2: Parser[c, b], input: Input[b]): ParseResult[a, b] =
+        input |> ((p1 `then` p2) `using` fst)
+
+    ///
     /// Returns the result of applying `f` to every element of
     /// the `ParseResult` of `p` on `input`.
     ///

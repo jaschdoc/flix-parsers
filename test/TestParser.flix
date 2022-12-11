@@ -17,8 +17,10 @@
 namespace TestParser {
 
     use Parser.{succeed, fail, literal, either,
-                then, using, many, some, number,
-                word, literalSequence, string};
+                then, thenIgnoringLeft,
+                thenIgnoringRight, using, many,
+                some, number, word,
+                literalSequence, string};
 
     // Helper functions
 
