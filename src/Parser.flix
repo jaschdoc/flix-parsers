@@ -103,12 +103,20 @@ namespace Parser {
     /// Returns one or more results of the parser `p`.
     ///
     /// Note that unlike `many`, this parser may fail, i.e.
-    /// returning 0 results.
+    /// return 0 results.
     ///
     /// Equivalent to `A+`.
     ///
     pub def some(p: Parser[a, b], input: Input[b]): ParseResult[List[a], b] =
         ((p `then` many(p)) `using` cons)(input)
+
+    ///
+    /// Returns one or more `ParseResults` recognizing numbers.
+    /// The longest match will be the first result.
+    ///
+    pub def number(input: Input[Char]): ParseResult[List[Char], Char] =
+        let digit = c -> '0' <= c and c <= '9';
+        input |> some(satisfy(digit))
 
     ///
     /// Returns the string `s` as an `Input` type.
