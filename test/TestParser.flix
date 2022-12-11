@@ -20,7 +20,7 @@ namespace TestParser {
                 then, thenIgnoringLeft,
                 thenIgnoringRight, using, many,
                 some, number, word,
-                literalSequence, string};
+                literalSequence, string, return};
 
     // Helper functions
 
@@ -817,6 +817,67 @@ namespace TestParser {
         let input = input("abc");
         let actual = string("ba", input);
         let expected = Nil;
+        Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Return                                                             //
+    ////////////////////////////////////////////////////////////////////////
+
+    @test
+    def return01(): Bool =
+        let input = noInput();
+        let actual = input |> (succeed(Nil) `return` "");
+        let expected = ("", Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def return02(): Bool =
+        let input = noInput();
+        let actual = input |> (fail `return` "");
+        let expected = Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def return03(): Bool =
+        let input = input("");
+        let actual = input |> (string("") `return` "");
+        let expected = ("", Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def return04(): Bool =
+        let input = input("");
+        let actual = input |> (string("") `return` 'a');
+        let expected = ('a', Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def return05(): Bool =
+        let input = input("");
+        let actual = input |> (string("") `return` 1);
+        let expected = (1, Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def return06(): Bool =
+        let input = input("abc");
+        let actual = input |> (string("") `return` 1);
+        let expected = (1, 'a' :: 'b' :: 'c' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def return07(): Bool =
+        let input = input("abc");
+        let actual = input |> (string("ab") `return` 1);
+        let expected = (1, 'c' :: Nil) :: Nil;
+        Assert.eq(expected, actual)
+
+    @test
+    def return08(): Bool =
+        let input = input("abc");
+        let actual = input |> (string("ab") `return` "");
+        let expected = ("", 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
 
 }
