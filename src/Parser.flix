@@ -154,6 +154,13 @@ namespace Parser {
         p(input)
 
     ///
+    /// Returns a `ParseResult` containing the value `c` if `p` is succesful.
+    ///
+    pub def return(p: Parser[a, b], c: c, input: Input[b]): ParseResult[c, b] =
+        let const = (x, _) -> x;
+        (p `using` (const(c)))(input)
+
+    ///
     /// Returns a `ParseResult` that recognizes the string `s`.
     ///
     pub def string(s: String, input: Input[Char]): ParseResult[List[Char], Char] =
