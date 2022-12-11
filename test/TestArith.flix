@@ -47,6 +47,9 @@ namespace TestArith {
         pub def parse(s: String): Option[Exp] =
             Parser.input(s) |> expn |> List.head |> Option.map(fst)
 
+        // Each production rule ends with ... `using` func, where func is a function
+        // that produces the corresponding AST node.
+
         def expn(input: List[Char]): ParseResult[Exp, Char] = input |> (
             ((term `then` (literal('+') `thenIgnoringLeft` term)) `using` plus)  `otherwise`
             ((term `then` (literal('-') `thenIgnoringLeft` term)) `using` minus) `otherwise`
