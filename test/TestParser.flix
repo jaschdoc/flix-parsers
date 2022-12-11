@@ -19,15 +19,12 @@ namespace TestParser {
     use Parser.{succeed, fail, literal, either,
                 then, thenIgnoringLeft,
                 thenIgnoringRight, using, many,
-                some, number, word,
+                some, number, word, input, stringify,
                 literalSequence, string, return};
 
     // Helper functions
 
     def noInput(): Input[Char] = Nil
-
-    def input(s: String): Input[Char] =
-        Parser.inputFromString(s)
 
     ////////////////////////////////////////////////////////////////////////
     // Succeed                                                            //
@@ -879,5 +876,18 @@ namespace TestParser {
         let actual = input |> (string("ab") `return` "");
         let expected = ("", 'c' :: Nil) :: Nil;
         Assert.eq(expected, actual)
+
+
+    ////////////////////////////////////////////////////////////////////////
+    // Stringify                                                          //
+    ////////////////////////////////////////////////////////////////////////
+/* This test loops?
+    @test
+    def stringify01(): Bool =
+        let input = input("aaab");
+        let actual = input |> many(literal('a'));
+        let expected = "aaa" :: "aa" :: "a" :: Nil;
+        Assert.eq(expected, stringify(actual))
+*/
 
 }

@@ -169,8 +169,19 @@ namespace Parser {
     ///
     /// Returns the string `s` as an `Input` type.
     ///
-    pub def inputFromString(s: String): Input[Char] =
+    pub def input(s: String): Input[Char] =
         String.toList(s)
+
+    ///
+    /// Returns for each succesful result in `res` the concatenation of the result as a string.
+    ///
+    pub def stringify(res: ParseResult[List[Char], b]): List[String] =
+        let str = chars -> region r {
+            let sb = new StringBuilder(r);
+            foreach (c <- iterator(r, chars)) StringBuilder.append!(c, sb);
+            StringBuilder.toString(sb)
+        };
+        res |> List.map(fst) |> List.map(str)
 
     ///
     /// Returns the tuple as a list, i.e.
