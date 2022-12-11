@@ -941,7 +941,15 @@ namespace TestParser {
     def nibble05(): Bool =
         let input = input("    aaa      ");
         let actual = input |> (nibble(string("aaa")));
-        let expected = ('a' :: 'a' :: 'a' :: Nil, Nil) :: Nil;
+        let expected =
+            ('a' :: 'a' :: 'a' :: Nil, Nil) ::
+            ('a' :: 'a' :: 'a' :: Nil, ' ' :: Nil) ::
+            ('a' :: 'a' :: 'a' :: Nil, ' ' :: ' ' :: Nil) ::
+            ('a' :: 'a' :: 'a' :: Nil, ' ' :: ' ' :: ' ' :: Nil) ::
+            ('a' :: 'a' :: 'a' :: Nil, ' ' :: ' ' :: ' ' :: ' ' :: Nil) ::
+            ('a' :: 'a' :: 'a' :: Nil, ' ' :: ' ' :: ' ' :: ' ' :: ' ' :: Nil) ::
+            ('a' :: 'a' :: 'a' :: Nil, ' ' :: ' ' :: ' ' :: ' ' :: ' ' :: ' ' :: Nil) ::
+            Nil;
         Assert.eq(expected, actual)
 
     @test
