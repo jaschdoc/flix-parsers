@@ -34,6 +34,10 @@ namespace TestParser {
         l |> List.map(match (a, ll) -> (a, l2d(ll)))
           |> l2d
 
+    def pr2(l: List[(List[a], List[b])]): ParseResult[DelayList[a], b] =
+        l |> List.map(match (a, ll) -> (l2d(a), l2d(ll)))
+          |> l2d
+
     ////////////////////////////////////////////////////////////////////////
     // Succeed                                                            //
     ////////////////////////////////////////////////////////////////////////
@@ -590,28 +594,28 @@ namespace TestParser {
     def many01(): Bool =
         let input = noInput();
         let actual = input |> many(literal('a'));
-        let expected = pr((Nil, Nil) :: Nil);
+        let expected = pr2((Nil, Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def many02(): Bool =
         let input = fromString("b");
         let actual = input |> many(literal('a'));
-        let expected = pr((Nil, 'b' :: Nil) :: Nil);
+        let expected = pr2((Nil, 'b' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def many03(): Bool =
         let input = fromString("ab");
         let actual = input |> many(literal('a'));
-        let expected = pr(('a' :: Nil, 'b' :: Nil) :: (Nil, 'a' :: 'b' :: Nil) :: Nil);
+        let expected = pr2(('a' :: Nil, 'b' :: Nil) :: (Nil, 'a' :: 'b' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def many04(): Bool =
         let input = fromString("aaab");
         let actual = input |> many(literal('a'));
-        let expected = pr(
+        let expected = pr2(
             ('a' :: 'a' :: 'a' :: Nil, 'b' :: Nil) ::
             ('a' :: 'a' :: Nil, 'a' :: 'b' :: Nil) ::
             ('a' :: Nil, 'a' :: 'a' :: 'b' :: Nil) ::
@@ -642,14 +646,14 @@ namespace TestParser {
     def some03(): Bool =
         let input = fromString("ab");
         let actual = input |> some(literal('a'));
-        let expected = pr(('a' :: Nil, 'b' :: Nil) :: Nil);
+        let expected = pr2(('a' :: Nil, 'b' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def some04(): Bool =
         let input = fromString("aaab");
         let actual = input |> some(literal('a'));
-        let expected = pr(
+        let expected = pr2(
             ('a' :: 'a' :: 'a' :: Nil, 'b' :: Nil) ::
             ('a' :: 'a' :: Nil, 'a' :: 'b' :: Nil) ::
             ('a' :: Nil, 'a' :: 'a' :: 'b' :: Nil) ::
@@ -687,7 +691,7 @@ namespace TestParser {
         let input = fromString("1 big apple");
         let rest = String.toList(" big apple");
         let actual = number(input);
-        let expected = pr(('1' :: Nil, rest) :: Nil);
+        let expected = pr2(('1' :: Nil, rest) :: Nil);
         Assert.eq(expected, actual)
 
     @test
@@ -695,7 +699,7 @@ namespace TestParser {
         let input = fromString("123 big apple");
         let rest = String.toList(" big apple");
         let actual = number(input);
-        let expected = pr(
+        let expected = pr2(
             ('1' :: '2' :: '3' :: Nil, rest) ::
             ('1' :: '2' :: Nil, '3' :: rest) ::
             ('1' :: Nil, '2' :: '3' :: rest) ::
@@ -718,7 +722,7 @@ namespace TestParser {
     def word02(): Bool =
         let input = fromString("abc");
         let actual = word(input);
-        let expected = pr(
+        let expected = pr2(
             ('a' :: 'b' :: 'c' :: Nil, Nil) ::
             ('a' :: 'b' :: Nil, 'c' :: Nil) ::
             ('a' :: Nil, 'b' :: 'c' :: Nil) ::
@@ -737,7 +741,7 @@ namespace TestParser {
         let input = fromString("big 123 apple");
         let rest = String.toList(" 123 apple");
         let actual = word(input);
-        let expected = pr(
+        let expected = pr2(
             ('b' :: 'i' :: 'g' :: Nil, rest) ::
             ('b' :: 'i' :: Nil, 'g' :: rest) ::
             ('b' :: Nil, 'i' :: 'g' :: rest) ::
@@ -753,28 +757,28 @@ namespace TestParser {
     def literalSequence01(): Bool =
         let input = noInput();
         let actual = literalSequence(Nil, input);
-        let expected = pr((Nil, Nil) :: Nil);
+        let expected = pr2((Nil, Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def literalSequence02(): Bool =
         let input = fromString("abc");
         let actual = literalSequence(Nil, input);
-        let expected = pr((Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil);
+        let expected = pr2((Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def literalSequence03(): Bool =
         let input = fromString("abc");
         let actual = literalSequence('a' :: 'b' :: Nil, input);
-        let expected = pr(('a' :: 'b' :: Nil, 'c' :: Nil) :: Nil);
+        let expected = pr2(('a' :: 'b' :: Nil, 'c' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def literalSequence04(): Bool =
         let input = fromString("abc");
         let actual = literalSequence('a' :: 'b' :: 'c' :: Nil, input);
-        let expected = pr(('a' :: 'b' :: 'c' :: Nil, Nil) :: Nil);
+        let expected = pr2(('a' :: 'b' :: 'c' :: Nil, Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
@@ -793,28 +797,28 @@ namespace TestParser {
     def string01(): Bool =
         let input = noInput();
         let actual = string("", input);
-        let expected = pr((Nil, Nil) :: Nil);
+        let expected = pr2((Nil, Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def string02(): Bool =
         let input = fromString("abc");
         let actual = string("", input);
-        let expected = pr((Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil);
+        let expected = pr2((Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def string03(): Bool =
         let input = fromString("abc");
         let actual = string("ab", input);
-        let expected = pr(('a' :: 'b' :: Nil, 'c' :: Nil) :: Nil);
+        let expected = pr2(('a' :: 'b' :: Nil, 'c' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def string04(): Bool =
         let input = fromString("abc");
         let actual = string("abc", input);
-        let expected = pr(('a' :: 'b' :: 'c' :: Nil, Nil) :: Nil);
+        let expected = pr2(('a' :: 'b' :: 'c' :: Nil, Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
@@ -949,7 +953,7 @@ namespace TestParser {
     def nibble05(): Bool =
         let input = fromString("    aaa      ");
         let actual = input |> (nibble(string("aaa")));
-        let expected = pr(
+        let expected = pr2(
             ('a' :: 'a' :: 'a' :: Nil, Nil) ::
             ('a' :: 'a' :: 'a' :: Nil, ' ' :: Nil) ::
             ('a' :: 'a' :: 'a' :: Nil, ' ' :: ' ' :: Nil) ::
@@ -964,7 +968,7 @@ namespace TestParser {
     def nibble06(): Bool =
         let input = fromString("    aaaabc");
         let actual = input |> (nibble(string("aaa")));
-        let expected = pr(('a' :: 'a' :: 'a' :: Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil);
+        let expected = pr2(('a' :: 'a' :: 'a' :: Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
