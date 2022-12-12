@@ -50,24 +50,24 @@ namespace TestArith {
         // Each production rule ends with ... `using` func, where func is a function
         // that produces the corresponding AST node.
 
-        def expn(input: DelayList[Char]): ParseResult[AExp, Char] = input |> (
+        def expn(input: Input[Char]): ParseResult[AExp, Char] = input |> (
             ((term `then` (literal('+') `thenIgnoringLeft` term)) `using` plus)  `otherwise`
             ((term `then` (literal('-') `thenIgnoringLeft` term)) `using` minus) `otherwise`
             term
         )
 
-        def term(input: DelayList[Char]): ParseResult[AExp, Char] = input |> (
+        def term(input: Input[Char]): ParseResult[AExp, Char] = input |> (
             ((factor `then` (literal('*') `thenIgnoringLeft` factor)) `using` times)  `otherwise`
             ((factor `then` (literal('/') `thenIgnoringLeft` factor)) `using` divide) `otherwise`
             factor
         )
 
-        def factor(input: DelayList[Char]): ParseResult[AExp, Char] = input |> (
+        def factor(input: Input[Char]): ParseResult[AExp, Char] = input |> (
             (number `using` value) `otherwise`
             (literal('(') `thenIgnoringLeft` expn `thenIgnoringRight` literal(')'))
         )
 
-        def value(nums: DelayList[Char]): AExp =
+        def value(nums: Input[Char]): AExp =
             let optInt = Parser.stringify(nums) |> Int32.fromString;
             match optInt {
                 case Some(n) => AExp.Num(n)

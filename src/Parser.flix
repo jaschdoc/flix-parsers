@@ -64,7 +64,7 @@ namespace Parser {
     /// followed by the result of parser `p2` applied to `input`.
     ///
     pub def otherwise(p1: Parser[a, b], p2: Parser[a, b], input: Input[b]): ParseResult[a, b] =
-        p1(input) ::: p2(input)
+        DelayList.append(p1(input), p2(input))
 
     ///
     /// Returns the `ParseResult` of sequencing `p1`, `p2`, i.e.
@@ -149,10 +149,12 @@ namespace Parser {
     /// Returns a `ParseResult` that recognizes the sequence `lit`.
     /// This is generalization of `literal`.
     ///
-    pub def literalSequence(lit: List[a], input: Input[a]): ParseResult[DelayList[a], a] with Eq[a] =
+    pub def literalSequence(lit: Input[a], input: Input[a]): ParseResult[DelayList[a], a] with Eq[a] =
         let p = match lit {
-            case Nil     => succeed(ENil)
-            case x :: xs => (literal(x) `then` (literalSequence(xs))) `using` cons
+            case ENil         => succeed(ENil)
+            case ECons(x, xs) => (literal(x) `then` (literalSequence(      xs))) `using` cons
+            case LCons(x, xs) => (literal(x) `then` (literalSequence(force xs))) `using` cons
+            case LList(xs)    => literalSequence(force xs)
         };
         p(input)
 
@@ -167,7 +169,7 @@ namespace Parser {
     /// Returns a `ParseResult` that recognizes the string `s`.
     ///
     pub def string(s: String): Parser[DelayList[Char], Char] =
-        (String.toList >> literalSequence)(s)
+        (String.toList >> fromFoldable >> literalSequence)(s)
 
     ///
     /// Returns a `ParseResult` where white-space
@@ -180,20 +182,26 @@ namespace Parser {
     /// Returns a `ParseResult` that recognizes whitespace.
     ///
     pub def whitespace(input: Input[Char]): ParseResult[DelayList[Char], Char] =
-        let chars = String.toList(" \t\n");
+        let chars = String.toList(" \t\n") |> fromFoldable;
         input |> (many(any(literal, chars)))
 
     ///
     /// Returns a `ParseResult` that recognizes any of the elements in `syms`.
     ///
-    pub def any(f: a -> Parser[b, c], syms: List[a], input: Input[c]): ParseResult[b, c] =
-        input |> List.foldRight(f >> otherwise, fail, syms)
+    pub def any(f: a -> Parser[b, c], syms: Input[a], input: Input[c]): ParseResult[b, c] =
+        input |> DelayList.foldRight(f >> otherwise, fail, syms)
 
     ///
     /// Returns the string `s` as an `Input` type.
     ///
     pub def fromString(s: String): Input[Char] =
-        String.toList(s) |> List.toDelayList
+        String.toList(s) |> fromFoldable
+
+    ///
+    /// Returns the contents of `f` as an `Input` type.
+    ///
+    pub def fromFoldable(f: f[a]): Input[a] with Foldable[f] =
+        Foldable.toDelayList(f)
 
     ///
     /// Returns `chars` as a string.

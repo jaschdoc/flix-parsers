@@ -19,14 +19,15 @@ namespace TestParser {
     use Parser.{succeed, fail, literal, otherwise,
                 then, thenIgnoringLeft, nibble,
                 thenIgnoringRight, using, many,
-                some, number, word, fromString, stringify,
-                literalSequence, string, return};
+                some, number, word, fromString,
+                literalSequence, string, return,
+                stringify, fromFoldable};
 
     // Helper functions
 
     def noInput(): Input[Char] = ENil
 
-    def l2d(l: List[a]): DelayList[a] = l2d(l)
+    def l2d(l: List[a]): DelayList[a] = fromFoldable(l)
 
     def d2l(l: DelayList[a]): List[a] = DelayList.toList(l)
 
@@ -756,35 +757,35 @@ namespace TestParser {
     @test
     def literalSequence01(): Bool =
         let input = noInput();
-        let actual = literalSequence(Nil, input);
+        let actual = literalSequence(fromFoldable(Nil), input);
         let expected = pr2((Nil, Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def literalSequence02(): Bool =
         let input = fromString("abc");
-        let actual = literalSequence(Nil, input);
+        let actual = literalSequence(fromFoldable(Nil), input);
         let expected = pr2((Nil, 'a' :: 'b' :: 'c' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def literalSequence03(): Bool =
         let input = fromString("abc");
-        let actual = literalSequence('a' :: 'b' :: Nil, input);
+        let actual = literalSequence(fromFoldable('a' :: 'b' :: Nil), input);
         let expected = pr2(('a' :: 'b' :: Nil, 'c' :: Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def literalSequence04(): Bool =
         let input = fromString("abc");
-        let actual = literalSequence('a' :: 'b' :: 'c' :: Nil, input);
+        let actual = literalSequence(fromFoldable('a' :: 'b' :: 'c' :: Nil), input);
         let expected = pr2(('a' :: 'b' :: 'c' :: Nil, Nil) :: Nil);
         Assert.eq(expected, actual)
 
     @test
     def literalSequence05(): Bool =
         let input = fromString("abc");
-        let actual = literalSequence('b' :: 'a' :: Nil, input);
+        let actual = literalSequence(fromFoldable('b' :: 'a' :: Nil), input);
         let expected = pr(Nil);
         Assert.eq(expected, actual)
 
