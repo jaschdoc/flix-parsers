@@ -113,7 +113,8 @@ namespace Parser {
     /// Equivalent to `A*`.
     ///
     pub def many(p: Parser[a, b]): Parser[List[a], b] =
-        ((p `then` many(p)) `using` cons) `otherwise` succeed(Nil)
+        inp -> inp // Wrap in lambda so the recursive call does not immediately happen
+            |> (((p `then` many(p)) `using` cons) `otherwise` succeed(Nil))
 
     ///
     /// Returns one or more results of the parser `p`.
