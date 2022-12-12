@@ -14,9 +14,9 @@
    limitations under the License.
 */
 
-pub type alias Input[a] = List[a]
+pub type alias Input[a] = DelayList[a]
 
-pub type alias ParseResult[a, b] = List[(a, Input[b])]
+pub type alias ParseResult[a, b] = DelayList[(a, Input[b])]
 
 pub type alias Parser[a, b] = Input[b] -> ParseResult[a, b]
 
@@ -27,7 +27,7 @@ namespace Parser {
     /// regardless of input.
     ///
     pub def succeed(a: a, input: Input[b]): ParseResult[a, b] =
-        (a, input) :: Nil
+        ECons((a, input), ENil)
 
     ///
     /// Returns an empty `ParseResult` regardless of input.
@@ -35,7 +35,7 @@ namespace Parser {
     /// Equivalent to the empty string ϵ.
     ///
     pub def fail(_: Input[b]): ParseResult[a, b] =
-        Nil
+        ENil
 
     ///
     /// Returns a non-empty `ParseResult` if the input is non-empty
@@ -43,9 +43,12 @@ namespace Parser {
     /// Returns an empty `ParseResult` otherwise.
     ///
     pub def satisfy(p: a -> Bool, input: Input[a]): ParseResult[a, a] = match input {
-        case Nil             => fail(input)
-        case x :: xs if p(x) => succeed(x, xs)
-        case _ :: xs         => fail(xs)
+        case ENil                 => fail(input)
+        case ECons(x, xs) if p(x) => succeed(x,       xs)
+        case LCons(x, xs) if p(x) => succeed(x, force xs)
+        case LList(xs)            => LList(lazy satisfy(p, force xs))
+        case _                    => fail(input)
+
     }
 
     ///
@@ -54,7 +57,7 @@ namespace Parser {
     /// Returns an empty ParseReult otherwise.
     ///
     pub def literal(a: a, input: Input[a]): ParseResult[a, a] with Eq[a] =
-        satisfy(Eq.eq(a) , input)
+        satisfy(Eq.eq(a), input)
 
     ///
     /// Returns the result of parser `p1` applied to `input`
@@ -104,14 +107,14 @@ namespace Parser {
     ///
     /// Note that it always succeeds, so the result will always
     /// be non-empty, but the rest of the input may be `Nil`, along
-    /// with the result. I.e. both the value of `List[a]` may be `Nil`
-    /// and `b` may be `Nil`.
+    /// with the result. I.e. both the recognized input may be `Nil`
+    /// and the unconsumed input may be `Nil`.
     ///
     /// Equivalent to `A*`.
     ///
-    pub def many(p: Parser[a, b], input: Input[b]): ParseResult[List[a], b] =
+    pub def many(p: Parser[a, b], input: Input[b]): ParseResult[DelayList[a], b] =
         let p1 = (p `then` many(p)) `using` cons;
-        otherwise(p1, succeed(Nil), input)
+        otherwise(p1, succeed(ENil), input)
 
     ///
     /// Returns one or more results of the parser `p`.
@@ -121,14 +124,14 @@ namespace Parser {
     ///
     /// Equivalent to `A+`.
     ///
-    pub def some(p: Parser[a, b], input: Input[b]): ParseResult[List[a], b] =
+    pub def some(p: Parser[a, b], input: Input[b]): ParseResult[DelayList[a], b] =
         ((p `then` many(p)) `using` cons)(input)
 
     ///
     /// Returns one or more `ParseResults` recognizing numbers.
     /// The longest match will be the first result.
     ///
-    pub def number(input: Input[Char]): ParseResult[List[Char], Char] =
+    pub def number(input: Input[Char]): ParseResult[DelayList[Char], Char] =
         let digit = c -> '0' <= c and c <= '9';
         input |> some(satisfy(digit))
 
@@ -136,7 +139,7 @@ namespace Parser {
     /// Returns one or more `ParseResults` recognizing consecutive chars.
     /// The longest match will be the first result.
     ///
-    pub def word(input: Input[Char]): ParseResult[List[Char], Char] =
+    pub def word(input: Input[Char]): ParseResult[DelayList[Char], Char] =
         let lowercase = c -> 'a' <= c and c <= 'z';
         let uppercase = c -> 'A' <= c and c <= 'Z';
         let letter = c -> lowercase(c) or uppercase(c);
@@ -146,9 +149,9 @@ namespace Parser {
     /// Returns a `ParseResult` that recognizes the sequence `lit`.
     /// This is generalization of `literal`.
     ///
-    pub def literalSequence(lit: List[a], input: Input[a]): ParseResult[List[a], a] with Eq[a] =
+    pub def literalSequence(lit: List[a], input: Input[a]): ParseResult[DelayList[a], a] with Eq[a] =
         let p = match lit {
-            case Nil     => succeed(Nil)
+            case Nil     => succeed(ENil)
             case x :: xs => (literal(x) `then` (literalSequence(xs))) `using` cons
         };
         p(input)
@@ -163,20 +166,20 @@ namespace Parser {
     ///
     /// Returns a `ParseResult` that recognizes the string `s`.
     ///
-    pub def string(s: String, input: Input[Char]): ParseResult[List[Char], Char] =
-        (String.toList >> literalSequence)(s, input)
+    pub def string(s: String): Parser[DelayList[Char], Char] =
+        (String.toList >> literalSequence)(s)
 
     ///
     /// Returns a `ParseResult` where white-space
     /// has been removed on both sides of `p`.
     ///
-    pub def nibble(p: Parser[a, Char], input: Input[Char]): ParseResult[a, Char] =
-        input |> (whitespace `thenIgnoringLeft` p `thenIgnoringRight` whitespace)
+    pub def nibble(p: Parser[a, Char]): Parser[a, Char] =
+        whitespace `thenIgnoringLeft` p `thenIgnoringRight` whitespace
 
     ///
     /// Returns a `ParseResult` that recognizes whitespace.
     ///
-    pub def whitespace(input: Input[Char]): ParseResult[List[Char], Char] =
+    pub def whitespace(input: Input[Char]): ParseResult[DelayList[Char], Char] =
         let chars = String.toList(" \t\n");
         input |> (many(any(literal, chars)))
 
@@ -190,12 +193,12 @@ namespace Parser {
     /// Returns the string `s` as an `Input` type.
     ///
     pub def fromString(s: String): Input[Char] =
-        String.toList(s)
+        String.toList(s) |> List.toDelayList
 
     ///
     /// Returns `chars` as a string.
     ///
-    pub def stringify(chars: List[Char]): String = region r {
+    pub def stringify(chars: m[Char]): String with Foldable[m] = region r {
         use Foldable.iterator;
         let sb = new StringBuilder(r);
         foreach (c <- iterator(r, chars)) StringBuilder.append!(c, sb);
@@ -206,7 +209,7 @@ namespace Parser {
     /// Returns the tuple as a list, i.e.
     /// `(x, xs)` is returned as `x :: xs`.
     ///
-    def cons(xs: (a, List[a])): List[a] =
-        fst(xs) :: snd(xs)
+    def cons(xs: (a, DelayList[a])): DelayList[a] =
+        ECons(fst(xs), snd(xs))
 
 }
