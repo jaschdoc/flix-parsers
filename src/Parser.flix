@@ -149,12 +149,10 @@ namespace Parser {
     /// Returns a `ParseResult` that recognizes the sequence `lit`.
     /// This is generalization of `literal`.
     ///
-    pub def literalSequence(lit: Input[a], input: Input[a]): ParseResult[DelayList[a], a] with Eq[a] =
-        let p = match lit {
-            case ENil         => succeed(ENil)
-            case ECons(x, xs) => (literal(x) `then` (literalSequence(      xs))) `using` cons
-            case LCons(x, xs) => (literal(x) `then` (literalSequence(force xs))) `using` cons
-            case LList(xs)    => literalSequence(force xs)
+    pub def literalSequence(lit: m[a], input: Input[a]): ParseResult[DelayList[a], a] with Eq[a], Foldable[m] =
+        let p = match Foldable.toList(lit) {
+            case Nil     => succeed(ENil)
+            case x :: xs => (literal(x) `then` (literalSequence(xs))) `using` cons
         };
         p(input)
 
@@ -169,7 +167,7 @@ namespace Parser {
     /// Returns a `ParseResult` that recognizes the string `s`.
     ///
     pub def string(s: String): Parser[DelayList[Char], Char] =
-        (String.toList >> fromFoldable >> literalSequence)(s)
+        (String.toList >> literalSequence)(s)
 
     ///
     /// Returns a `ParseResult` where white-space
@@ -182,26 +180,20 @@ namespace Parser {
     /// Returns a `ParseResult` that recognizes whitespace.
     ///
     pub def whitespace(input: Input[Char]): ParseResult[DelayList[Char], Char] =
-        let chars = String.toList(" \t\n") |> fromFoldable;
+        let chars = String.toList(" \t\n");
         input |> (many(any(literal, chars)))
 
     ///
     /// Returns a `ParseResult` that recognizes any of the elements in `syms`.
     ///
-    pub def any(f: a -> Parser[b, c], syms: Input[a], input: Input[c]): ParseResult[b, c] =
-        input |> DelayList.foldRight(f >> otherwise, fail, syms)
+    pub def any(f: a -> Parser[b, c], syms: m[a], input: Input[c]): ParseResult[b, c] with Foldable[m] =
+        input |> Foldable.foldRight(f >> otherwise, fail, syms)
 
     ///
     /// Returns the string `s` as an `Input` type.
     ///
     pub def fromString(s: String): Input[Char] =
-        String.toList(s) |> fromFoldable
-
-    ///
-    /// Returns the contents of `f` as an `Input` type.
-    ///
-    pub def fromFoldable(f: f[a]): Input[a] with Foldable[f] =
-        Foldable.toDelayList(f)
+        String.toList(s) |> List.toDelayList
 
     ///
     /// Returns `chars` as a string.
