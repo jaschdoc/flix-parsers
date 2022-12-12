@@ -96,6 +96,11 @@ namespace TestArith {
     // Eval                                                               //
     ////////////////////////////////////////////////////////////////////////
 
+    def testEval(expected: Int32, prog: Option[Exp]): Bool = match prog {
+        case Some(e) => Assert.eq(expected, eval(e))
+        case None => unreachable!()
+    }
+
     @test
     def eval01(): Bool =
         let actual = TestArith/ArithParser.parse("");
@@ -104,25 +109,28 @@ namespace TestArith {
 
     @test
     def eval02(): Bool =
-        let prog = TestArith/ArithParser.parse("1");
-        match prog {
-            case Some(e) =>
-                let actual = eval(e);
-                let expected = 1;
-                Assert.eq(expected, actual)
-            case None => unreachable!()
-        }
+        TestArith/ArithParser.parse("1")
+        |> testEval(1)
 
     @test
     def eval03(): Bool =
-        let prog = TestArith/ArithParser.parse("2+2");
-        match prog {
-            case Some(e) =>
-                let actual = eval(e);
-                let expected = 4;
-                Assert.eq(expected, actual)
-            case None => unreachable!()
-        }
+        TestArith/ArithParser.parse("2+2")
+        |> testEval(2 + 2)
+
+    @test
+    def eval04(): Bool =
+        TestArith/ArithParser.parse("2+2/2+5*3*2/2")
+        |> testEval(2+2/2+5*3*2/2)
+
+    @test
+    def eval05(): Bool =
+        TestArith/ArithParser.parse("1/1")
+        |> testEval(1)
+
+    @test
+    def eval06(): Bool =
+        TestArith/ArithParser.parse("(2+2)/2+2/(2-1)")
+        |> testEval((2 + 2) / 2 + 2 / (2 - 1))
 
 
     ////////////////////////////////////////////////////////////////////////
