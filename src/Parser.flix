@@ -24,13 +24,13 @@ namespace Parser {
 
     ///
     /// Returns a non-empty `ParseResult` with value `b`
-    /// regardless of input.
+    /// regardless of inp.
     ///
     pub def succeed(a: a): Parser[a, b] =
-        input -> (a, input) :: Nil
+        inp -> (a, inp) :: Nil
 
     ///
-    /// Returns an empty `ParseResult` regardless of input.
+    /// Returns an empty `ParseResult` regardless of inp.
     ///
     /// Equivalent to the empty string ϵ.
     ///
@@ -38,19 +38,19 @@ namespace Parser {
         Nil
 
     ///
-    /// Returns a non-empty `ParseResult` if the input is non-empty
+    /// Returns a non-empty `ParseResult` if the inp is non-empty
     /// and the first element satisfies the predicate `p`.
     /// Returns an empty `ParseResult` otherwise.
     ///
     pub def satisfy(p: a -> Bool): Parser[a, a] =
-        input -> match input {
-            case Nil             => fail(input)
+        inp -> match inp {
+            case Nil             => fail(inp)
             case x :: xs if p(x) => succeed(x, xs)
             case _ :: xs         => fail(xs)
         }
 
     ///
-    /// Returns a non-empty `ParseResult` if the first element of the input
+    /// Returns a non-empty `ParseResult` if the first element of the inp
     /// is equal to `a`.
     /// Returns an empty ParseReult otherwise.
     ///
@@ -58,23 +58,23 @@ namespace Parser {
         satisfy(Eq.eq(a))
 
     ///
-    /// Returns the result of parser `p1` applied to `input`
-    /// followed by the result of parser `p2` applied to `input`.
+    /// Returns the result of parser `p1` applied to `inp`
+    /// followed by the result of parser `p2` applied to `inp`.
     ///
     pub def otherwise(p1: Parser[a, b], p2: Parser[a, b]): Parser[a, b] =
-        input -> p1(input) ::: p2(input)
+        inp -> p1(inp) ::: p2(inp)
 
     ///
     /// Returns the `ParseResult` of sequencing `p1`, `p2`, i.e.
-    /// `p1` is applied to the input and `p2` is applied to the
-    /// input that `p1` did not consume.
+    /// `p1` is applied to the inp and `p2` is applied to the
+    /// inp that `p1` did not consume.
     ///
     /// Equivalent to `AB` where `A` and `B` are non-terminals.
     ///
     pub def then(p1: Parser[a, b], p2: Parser[c, b]): Parser[(a, c), b] =
-        input ->
+        inp ->
             for (
-                (x1, rest1) <- p1(input);
+                (x1, rest1) <- p1(inp);
                 (x2, rest2) <- p2(rest1)
             ) yield ((x1, x2), rest2)
 
@@ -94,19 +94,19 @@ namespace Parser {
 
     ///
     /// Returns the result of applying `f` to every element of
-    /// the `ParseResult` of `p` on `input`.
+    /// the `ParseResult` of `p` on `inp`.
     ///
     pub def using(p: Parser[a, b], f: a -> c): Parser[c, b] =
-        input ->
+        inp ->
             for (
-                (x, rest) <- p(input)
+                (x, rest) <- p(inp)
             ) yield (f(x), rest)
 
     ///
     /// Returns zero or more results of the parser `p`.
     ///
     /// Note that it always succeeds, so the result will always
-    /// be non-empty, but the rest of the input may be `Nil`, along
+    /// be non-empty, but the rest of the inp may be `Nil`, along
     /// with the result. I.e. both the value of `List[a]` may be `Nil`
     /// and `b` may be `Nil`.
     ///
@@ -130,30 +130,30 @@ namespace Parser {
     /// Returns one or more `ParseResults` recognizing numbers.
     /// The longest match will be the first result.
     ///
-    pub def number(input: Input[Char]): ParseResult[List[Char], Char] =
+    pub def number(inp: Input[Char]): ParseResult[List[Char], Char] =
         let digit = c -> '0' <= c and c <= '9';
-        input |> some(satisfy(digit))
+        inp |> some(satisfy(digit))
 
     ///
     /// Returns one or more `ParseResults` recognizing consecutive chars.
     /// The longest match will be the first result.
     ///
-    pub def word(input: Input[Char]): ParseResult[List[Char], Char] =
+    pub def word(inp: Input[Char]): ParseResult[List[Char], Char] =
         let lowercase = c -> 'a' <= c and c <= 'z';
         let uppercase = c -> 'A' <= c and c <= 'Z';
         let letter = c -> lowercase(c) or uppercase(c);
-        input |> some(satisfy(letter))
+        inp |> some(satisfy(letter))
 
     ///
     /// Returns a `ParseResult` that recognizes the sequence `lit`.
     /// This is generalization of `literal`.
     ///
     pub def literalSequence(lit: List[a]): Parser[List[a], a] with Eq[a] =
-        input -> // Wrap in lambda so the recursive call does not immediately happen
+        inp -> // Wrap in lambda so the recursive call does not immediately happen
             match lit {
                 case Nil     => succeed(Nil)
                 case x :: xs => (literal(x) `then` (literalSequence(xs))) `using` cons
-            }(input)
+            }(inp)
 
     ///
     /// Returns a `ParseResult` containing the value `c` if `p` is succesful.
@@ -178,9 +178,9 @@ namespace Parser {
     ///
     /// Returns a `ParseResult` that recognizes whitespace.
     ///
-    pub def whitespace(input: Input[Char]): ParseResult[List[Char], Char] =
+    pub def whitespace(inp: Input[Char]): ParseResult[List[Char], Char] =
         let chars = String.toList(" \t\n");
-        input |> (many(any(literal, chars)))
+        inp |> (many(any(literal, chars)))
 
     ///
     /// Returns a `ParseResult` that recognizes any of the elements in `syms`.
