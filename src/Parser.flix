@@ -23,14 +23,14 @@ pub type alias Parser[a, b] = Input[b] -> ParseResult[a, b]
 namespace Parser {
 
     ///
-    /// Returns a non-empty `ParseResult` with value `b`
-    /// regardless of inp.
+    /// Returns a parser that always succeeds with value `b`
+    /// regardless of input.
     ///
     pub def succeed(a: a): Parser[a, b] =
         inp -> (a, inp) :: Nil
 
     ///
-    /// Returns an empty `ParseResult` regardless of inp.
+    /// Returns a parser that always fails regardless of input.
     ///
     /// Equivalent to the empty string ϵ.
     ///
@@ -38,9 +38,12 @@ namespace Parser {
         Nil
 
     ///
-    /// Returns a non-empty `ParseResult` if the inp is non-empty
-    /// and the first element satisfies the predicate `p`.
-    /// Returns an empty `ParseResult` otherwise.
+    /// Returns a parser that succeeds with value `x`
+    /// if the input is non-empty and the first
+    /// element `x` of the input satisfies
+    /// the predicate `p(x)`.
+    ///
+    /// The parser fails otherwise.
     ///
     pub def satisfy(p: a -> Bool): Parser[a, a] =
         inp -> match inp {
@@ -50,9 +53,10 @@ namespace Parser {
         }
 
     ///
-    /// Returns a non-empty `ParseResult` if the first element of the inp
-    /// is equal to `a`.
-    /// Returns an empty ParseReult otherwise.
+    /// Returns a parser that succeeds with value `a`
+    /// if the first element of the input is equal to `a`.
+    ///
+    /// The parser fails otherwise.
     ///
     pub def literal(a: a): Parser[a, a] with Eq[a] =
         satisfy(Eq.eq(a))
