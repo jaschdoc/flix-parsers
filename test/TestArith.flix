@@ -51,14 +51,14 @@ namespace TestArith {
         // that produces the corresponding AST node.
 
         def expn(input: List[Char]): ParseResult[AExp, Char] = input |> (
-            ((term `then` (literal('+') `thenIgnoringLeft` term)) `using` plus)  `otherwise`
-            ((term `then` (literal('-') `thenIgnoringLeft` term)) `using` minus) `otherwise`
+            ((term `thenIgnoringRight` literal('+') `then` term) `using` plus)  `otherwise`
+            ((term `thenIgnoringRight` literal('-') `then` term) `using` minus) `otherwise`
             term
         )
 
         def term(input: List[Char]): ParseResult[AExp, Char] = input |> (
-            ((factor `then` (literal('*') `thenIgnoringLeft` factor)) `using` times)  `otherwise`
-            ((factor `then` (literal('/') `thenIgnoringLeft` factor)) `using` divide) `otherwise`
+            ((factor `thenIgnoringRight` literal('*') `then` factor) `using` times)  `otherwise`
+            ((factor `thenIgnoringRight` literal('/') `then` factor) `using` divide) `otherwise`
             factor
         )
 
@@ -119,8 +119,8 @@ namespace TestArith {
 
     @test
     def eval04(): Bool =
-        TestArith/ArithParser.parse("2+2/2+5*3*2/2")
-        |> testEval(2+2/2+5*3*2/2)
+        TestArith/ArithParser.parse("(1+(2/2)+3*4*5/5)")
+        |> testEval(1+2/2+3*4*5/5)
 
     @test
     def eval05(): Bool =
@@ -154,8 +154,8 @@ namespace TestArith {
 
     @test
     def show03(): Bool =
-        TestArith/ArithParser.parse("2+2/2+5*3*2/2")
-        |> testShow("((2 + (2 / 2)) + (((5 * 3) * 2) / 2))")
+        TestArith/ArithParser.parse("1+2/3+4*5*6/7")
+        |> testShow("((1 + (2 / 3)) + (((4 * 5) * 6) / 7))")
 
     @test
     def show04(): Bool =
