@@ -62,18 +62,19 @@ namespace Parser {
         satisfy(Eq.eq(a))
 
     ///
-    /// Returns the result of parser `p1` applied to `inp`
-    /// followed by the result of parser `p2` applied to `inp`.
+    /// Returns a parser that recognizes the alternation
+    /// of `p1` and `p2` (i.e. it recognizes both `p1` and `p2`).
+    ///
+    /// Equivalent to `p1` | `p2`.
     ///
     pub def otherwise(p1: Parser[a, b], p2: Parser[a, b]): Parser[a, b] =
         inp -> p1(inp) ::: p2(inp)
 
     ///
-    /// Returns the `ParseResult` of sequencing `p1`, `p2`, i.e.
-    /// `p1` is applied to the inp and `p2` is applied to the
-    /// inp that `p1` did not consume.
+    /// Returns a parser that recognizes the concatenation of
+    /// `p1` and `p2`.
     ///
-    /// Equivalent to `AB` where `A` and `B` are non-terminals.
+    /// Equivalent to `p1p2`.
     ///
     pub def then(p1: Parser[a, b], p2: Parser[c, b]): Parser[(a, c), b] =
         inp ->
@@ -83,22 +84,24 @@ namespace Parser {
             ) yield ((x1, x2), rest2)
 
     ///
-    /// Returns a `ParseResult` that recognizes the concatenation of `p1` and `p2`
-    /// but discards the result of `p1`.
+    /// Returns a parser that recognizes the concatenation of
+    /// `p1` and `p2` but discards the result of `p1`.
     ///
     pub def thenIgnoringLeft(p1: Parser[a, b], p2: Parser[c, b]): Parser[c, b] =
         (p1 `then` p2) `using` snd
 
     ///
-    /// Returns a `ParseResult` that recognizes the concatenation of `p1` and `p2`
-    /// but discards the result of `p2`.
+    /// Returns a parser that recognizes the concatenation of
+    /// `p1` and `p2` but discards the result of `p2`.
     ///
     pub def thenIgnoringRight(p1: Parser[a, b], p2: Parser[c, b]): Parser[a, b] =
         (p1 `then` p2) `using` fst
 
     ///
-    /// Returns the result of applying `f` to every element of
-    /// the `ParseResult` of `p` on `inp`.
+    /// Returns a parser that applies `f` to all recognized
+    /// values of `p`.
+    ///
+    /// Useful for producing AST nodes.
     ///
     pub def using(p: Parser[a, b], f: a -> c): Parser[c, b] =
         inp ->
@@ -107,32 +110,40 @@ namespace Parser {
             ) yield (f(x), rest)
 
     ///
-    /// Returns zero or more results of the parser `p`.
+    /// Returns a parser that recognizes zero or more repetitions
+    /// of `p`.
     ///
     /// Note that it always succeeds, so the result will always
-    /// be non-empty, but the rest of the inp may be `Nil`, along
-    /// with the result. I.e. both the value of `List[a]` may be `Nil`
-    /// and `b` may be `Nil`.
+    /// be non-empty, but the rest of the inp may be empty as well as
+    /// the result.
+    /// I.e. both the recognized value of may be empty (but still exist) and
+    /// the unconsumed may be empty (but still exist).
     ///
-    /// Equivalent to `A*`.
+    /// Equivalent to `p*`.
     ///
     pub def many(p: Parser[a, b]): Parser[List[a], b] =
         inp -> inp // Wrap in lambda so the recursive call does not immediately happen
             |> (((p `then` many(p)) `using` cons) `otherwise` succeed(Nil))
 
     ///
-    /// Returns one or more results of the parser `p`.
+    /// Returns a parser that recognizes one or more repetitions
+    /// of `p`.
     ///
     /// Note that unlike `many`, this parser may fail, i.e.
-    /// return 0 results.
+    /// not recognize anything.
     ///
-    /// Equivalent to `A+`.
+    /// Equivalent to `p+`.
     ///
     pub def some(p: Parser[a, b]): Parser[List[a], b] =
         (p `then` many(p)) `using` cons
 
     ///
-    /// Returns one or more `ParseResults` recognizing numbers.
+    /// Returns a parser that recognizes numbers (consecutive integer characters).
+    ///
+    /// All possible parses of the number will be recognized.
+    ///
+    /// E.g. `123` is recognized as `123, 12, 1`.
+    ///
     /// The longest match will be the first result.
     ///
     pub def number(inp: Input[Char]): ParseResult[List[Char], Char] =
@@ -140,7 +151,13 @@ namespace Parser {
         inp |> some(satisfy(digit))
 
     ///
-    /// Returns one or more `ParseResults` recognizing consecutive chars.
+    /// Returns a parser that recognizes words
+    /// (consectutive non-integer, non-whitespace characters).
+    ///
+    /// All possible parses of the word will be recognized.
+    ///
+    /// E.g. `hello` is recognized as `hello, hell, hel, he, h`.
+    ///
     /// The longest match will be the first result.
     ///
     pub def word(inp: Input[Char]): ParseResult[List[Char], Char] =
@@ -150,7 +167,8 @@ namespace Parser {
         inp |> some(satisfy(letter))
 
     ///
-    /// Returns a `ParseResult` that recognizes the sequence `lit`.
+    /// Returns a parser that recognizes the sequence `lit`.
+    ///
     /// This is generalization of `literal`.
     ///
     pub def literalSequence(lit: List[a]): Parser[List[a], a] with Eq[a] =
@@ -161,34 +179,34 @@ namespace Parser {
             }(inp)
 
     ///
-    /// Returns a `ParseResult` containing the value `c` if `p` is succesful.
+    /// Returns parser that returns the the value `c` if `p` is succesful.
     ///
     pub def return(p: Parser[a, b], c: c): Parser[c, b] =
         let const = (x, _) -> x;
         p `using` const(c)
 
     ///
-    /// Returns a `ParseResult` that recognizes the string `s`.
+    /// Returns a parser that recognizes the string `s`.
     ///
     pub def string(s: String): Parser[List[Char], Char] =
         s |> (String.toList >> literalSequence)
 
     ///
-    /// Returns a `ParseResult` where white-space
-    /// has been removed on both sides of `p`.
+    /// Returns a parser that ignores whitespace on both
+    /// sides of `p`.
     ///
     pub def nibble(p: Parser[a, Char]): Parser[a, Char] =
         whitespace `thenIgnoringLeft` p `thenIgnoringRight` whitespace
 
     ///
-    /// Returns a `ParseResult` that recognizes whitespace.
+    /// Returns a parser that recognizes whitespace.
     ///
     pub def whitespace(inp: Input[Char]): ParseResult[List[Char], Char] =
         let chars = String.toList(" \t\n");
         inp |> (many(any(literal, chars)))
 
     ///
-    /// Returns a `ParseResult` that recognizes any of the elements in `syms`.
+    /// Returns a parser that recognizes any of the elements in `syms`.
     ///
     pub def any(f: a -> Parser[b, c], syms: List[a]): Parser[b, c] =
         List.foldRight(f >> otherwise, fail, syms)
