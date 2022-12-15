@@ -137,27 +137,35 @@ namespace TestArith {
     // Show                                                               //
     ////////////////////////////////////////////////////////////////////////
 
+    def testShow(expected: String, prog: Option[Exp]): Bool = match prog {
+        case Some(e) => Assert.eq(expected, show(e))
+        case None => unreachable!()
+    }
+
     @test
     def show01(): Bool =
-        let prog = TestArith/ArithParser.parse("1");
-        match prog {
-            case Some(e) =>
-                let actual = show(e);
-                let expected = "1";
-                Assert.eq(expected, actual)
-            case None => unreachable!()
-        }
+        TestArith/ArithParser.parse("1")
+        |> testShow("1")
 
     @test
     def show02(): Bool =
-        let prog = TestArith/ArithParser.parse("2+2");
-        match prog {
-            case Some(e) =>
-                let actual = show(e);
-                let expected = "(2 + 2)";
-                Assert.eq(expected, actual)
-            case None => unreachable!()
-        }
+        TestArith/ArithParser.parse("2+2")
+        |> testShow("(2 + 2)")
+
+    @test
+    def show03(): Bool =
+        TestArith/ArithParser.parse("2+2/2+5*3*2/2")
+        |> testShow("((2 + (2 / 2)) + (((5 * 3) * 2) / 2))")
+
+    @test
+    def show04(): Bool =
+        TestArith/ArithParser.parse("1/1")
+        |> testShow("(1 / 1)")
+
+    @test
+    def show05(): Bool =
+        TestArith/ArithParser.parse("(2+2)/2+2/(2-1)")
+        |> testShow("(((2 + 2) / 2) + (2 / (2 - 1)))")
 
 }
 
