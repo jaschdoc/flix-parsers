@@ -45,20 +45,23 @@ namespace TestArith {
         use TestArith.{Exp => AExp};
 
         pub def parse(s: String): Option[AExp] =
-            Parser.fromString(s) |> expn |> List.head |> Option.map(fst)
+            let prog = Parser.fromString(s) |> expn;
+            debug(prog);
+            prog |> List.head |> Option.map(fst)
+
 
         // Each production rule ends with ... `using` func, where func is a function
         // that produces the corresponding AST node.
 
         def expn(input: List[Char]): ParseResult[AExp, Char] = input |> (
-            ((term `then` (literal('+') `thenIgnoringLeft` term)) `using` plus)  `otherwise`
-            ((term `then` (literal('-') `thenIgnoringLeft` term)) `using` minus) `otherwise`
+            ((term `thenIgnoringRight` literal('+') `then` term) `using` plus)  `otherwise`
+            ((term `thenIgnoringRight` literal('-') `then` term) `using` minus) `otherwise`
             term
         )
 
         def term(input: List[Char]): ParseResult[AExp, Char] = input |> (
-            ((factor `then` (literal('*') `thenIgnoringLeft` factor)) `using` times)  `otherwise`
-            ((factor `then` (literal('/') `thenIgnoringLeft` factor)) `using` divide) `otherwise`
+            ((factor `thenIgnoringRight` literal('*') `then` factor) `using` times)  `otherwise`
+            ((factor `thenIgnoringRight` literal('/') `then` factor) `using` divide) `otherwise`
             factor
         )
 
@@ -96,6 +99,11 @@ namespace TestArith {
     // Eval                                                               //
     ////////////////////////////////////////////////////////////////////////
 
+    def testEval(expected: Int32, prog: Option[Exp]): Bool = match prog {
+        case Some(e) => Assert.eq(expected, eval(e))
+        case None => unreachable!()
+    }
+
     @test
     def eval01(): Bool =
         let actual = TestArith/ArithParser.parse("");
@@ -104,52 +112,63 @@ namespace TestArith {
 
     @test
     def eval02(): Bool =
-        let prog = TestArith/ArithParser.parse("1");
-        match prog {
-            case Some(e) =>
-                let actual = eval(e);
-                let expected = 1;
-                Assert.eq(expected, actual)
-            case None => unreachable!()
-        }
+        TestArith/ArithParser.parse("1")
+        |> testEval(1)
 
     @test
     def eval03(): Bool =
-        let prog = TestArith/ArithParser.parse("2+2");
-        match prog {
-            case Some(e) =>
-                let actual = eval(e);
-                let expected = 4;
-                Assert.eq(expected, actual)
-            case None => unreachable!()
-        }
+        TestArith/ArithParser.parse("2+2")
+        |> testEval(2 + 2)
+
+    @test
+    def eval04(): Bool =
+        TestArith/ArithParser.parse("1+(2/2+3*4*5/5)")
+        |> testEval(1+2/2+3*4*5/5)
+
+    @test
+    def eval05(): Bool =
+        TestArith/ArithParser.parse("1/1")
+        |> testEval(1)
+
+    @test
+    def eval06(): Bool =
+        TestArith/ArithParser.parse("(2+2)/2+2/(2-1)")
+        |> testEval((2 + 2) / 2 + 2 / (2 - 1))
 
 
     ////////////////////////////////////////////////////////////////////////
     // Show                                                               //
     ////////////////////////////////////////////////////////////////////////
 
+    def testShow(expected: String, prog: Option[Exp]): Bool = match prog {
+        case Some(e) => Assert.eq(expected, show(e))
+        case None => unreachable!()
+    }
+
     @test
     def show01(): Bool =
-        let prog = TestArith/ArithParser.parse("1");
-        match prog {
-            case Some(e) =>
-                let actual = show(e);
-                let expected = "1";
-                Assert.eq(expected, actual)
-            case None => unreachable!()
-        }
+        TestArith/ArithParser.parse("1")
+        |> testShow("1")
 
     @test
     def show02(): Bool =
-        let prog = TestArith/ArithParser.parse("2+2");
-        match prog {
-            case Some(e) =>
-                let actual = show(e);
-                let expected = "(2 + 2)";
-                Assert.eq(expected, actual)
-            case None => unreachable!()
-        }
+        TestArith/ArithParser.parse("2+2")
+        |> testShow("(2 + 2)")
+
+    @test
+    def show03(): Bool =
+        TestArith/ArithParser.parse("1+(2/3+4*5*6/7)")
+        |> testShow("((1 + (2 / 3)) + (((4 * 5) * 6) / 7))")
+
+    @test
+    def show04(): Bool =
+        TestArith/ArithParser.parse("1/1")
+        |> testShow("(1 / 1)")
+
+    @test
+    def show05(): Bool =
+        TestArith/ArithParser.parse("(2+2)/2+2/(2-1)")
+        |> testShow("(((2 + 2) / 2) + (2 / (2 - 1)))")
 
 }
 
