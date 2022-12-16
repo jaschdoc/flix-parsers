@@ -45,7 +45,10 @@ namespace TestArith {
         use TestArith.{Exp => AExp};
 
         pub def parse(s: String): Option[AExp] =
-            Parser.fromString(s) |> expn |> List.head |> Option.map(fst)
+            let prog = Parser.fromString(s) |> expn;
+            debug(prog);
+            prog |> List.head |> Option.map(fst)
+
 
         // Each production rule ends with ... `using` func, where func is a function
         // that produces the corresponding AST node.
