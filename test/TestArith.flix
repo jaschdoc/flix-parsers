@@ -119,7 +119,7 @@ namespace TestArith {
 
     @test
     def eval04(): Bool =
-        TestArith/ArithParser.parse("(1+(2/2)+3*4*5/5)")
+        TestArith/ArithParser.parse("1+(2/2+3*4*5/5)")
         |> testEval(1+2/2+3*4*5/5)
 
     @test
@@ -154,7 +154,7 @@ namespace TestArith {
 
     @test
     def show03(): Bool =
-        TestArith/ArithParser.parse("1+2/3+4*5*6/7")
+        TestArith/ArithParser.parse("1+(2/3+4*5*6/7)")
         |> testShow("((1 + (2 / 3)) + (((4 * 5) * 6) / 7))")
 
     @test
