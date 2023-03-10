@@ -23,14 +23,14 @@ pub type alias Parser[a, b] = Input[b] -> ParseResult[a, b]
 namespace Parser {
 
     ///
-    /// Returns a non-empty `ParseResult` with value `b`
+    /// Returns a parser that always succeeds with value `b`
     /// regardless of input.
     ///
-    pub def succeed(a: a, input: Input[b]): ParseResult[a, b] =
-        ECons((a, input), ENil)
+    pub def succeed(a: a): Parser[a, b] =
+        inp -> ECons((a, inp), ENil)
 
     ///
-    /// Returns an empty `ParseResult` regardless of input.
+    /// Returns a parser that always fails regardless of input.
     ///
     /// Equivalent to the empty string ϵ.
     ///
@@ -38,156 +38,180 @@ namespace Parser {
         ENil
 
     ///
-    /// Returns a non-empty `ParseResult` if the input is non-empty
-    /// and the first element satisfies the predicate `p`.
-    /// Returns an empty `ParseResult` otherwise.
+    /// Returns a parser that succeeds with value `x`
+    /// if the input is non-empty and the first
+    /// element `x` of the input satisfies
+    /// the predicate `p(x)`.
     ///
-    pub def satisfy(p: a -> Bool, input: Input[a]): ParseResult[a, a] = match input {
-        case ENil                 => fail(input)
-        case ECons(x, xs) if p(x) => succeed(x,       xs)
-        case LCons(x, xs) if p(x) => succeed(x, force xs)
-        case LList(xs)            => LList(lazy satisfy(p, force xs))
-        case _                    => fail(input)
-
-    }
-
+    /// The parser fails otherwise.
     ///
-    /// Returns a non-empty `ParseResult` if the first element of the input
-    /// is equal to `a`.
-    /// Returns an empty ParseReult otherwise.
-    ///
-    pub def literal(a: a, input: Input[a]): ParseResult[a, a] with Eq[a] =
-        satisfy(Eq.eq(a), input)
+    pub def satisfy(p: a -> Bool): Parser[a, a] =
+        inp -> match inp {
+            case ENil                 => fail(inp)
+            case ECons(x, xs) if p(x) => succeed(x,       xs)
+            case LCons(x, xs) if p(x) => succeed(x, force xs)
+            case LList(xs)            => LList(lazy satisfy(p, force xs))
+            case _                    => fail(inp)
+        }
 
     ///
-    /// Returns the result of parser `p1` applied to `input`
-    /// followed by the result of parser `p2` applied to `input`.
+    /// Returns a parser that succeeds with value `a`
+    /// if the first element of the input is equal to `a`.
     ///
-    pub def otherwise(p1: Parser[a, b], p2: Parser[a, b], input: Input[b]): ParseResult[a, b] =
-        DelayList.append(p1(input), p2(input))
+    /// The parser fails otherwise.
+    ///
+    pub def literal(a: a): Parser[a, a] with Eq[a] =
+        satisfy(Eq.eq(a))
 
     ///
-    /// Returns the `ParseResult` of sequencing `p1`, `p2`, i.e.
-    /// `p1` is applied to the input and `p2` is applied to the
-    /// input that `p1` did not consume.
+    /// Returns a parser that recognizes the alternation
+    /// of `p1` and `p2` (i.e. it recognizes both `p1` and `p2`).
     ///
-    /// Equivalent to `AB` where `A` and `B` are non-terminals.
+    /// Equivalent to `p1` | `p2`.
     ///
-    pub def then(p1: Parser[a, b], p2: Parser[c, b], input: Input[b]): ParseResult[(a, c), b] =
-        for (
-            (x1, rest1) <- p1(input);
-            (x2, rest2) <- p2(rest1)
-        ) yield ((x1, x2), rest2)
+    pub def otherwise(p1: Parser[a, b], p2: Parser[a, b]): Parser[a, b] =
+        inp -> DelayList.append(p1(inp), p2(inp))
 
     ///
-    /// Returns a `ParseResult` that recognizes the concatenation of `p1` and `p2`
-    /// but discards the result of `p1`.
+    /// Returns a parser that recognizes the concatenation of
+    /// `p1` and `p2`.
     ///
-    pub def thenIgnoringLeft(p1: Parser[a, b], p2: Parser[c, b], input: Input[b]): ParseResult[c, b] =
-        input |> ((p1 `then` p2) `using` snd)
+    /// Equivalent to `p1p2`.
+    ///
+    pub def then(p1: Parser[a, b], p2: Parser[c, b]): Parser[(a, c), b] =
+        inp ->
+            for (
+                (x1, rest1) <- p1(inp);
+                (x2, rest2) <- p2(rest1)
+            ) yield ((x1, x2), rest2)
 
     ///
-    /// Returns a `ParseResult` that recognizes the concatenation of `p1` and `p2`
-    /// but discards the result of `p2`.
+    /// Returns a parser that recognizes the concatenation of
+    /// `p1` and `p2` but discards the result of `p1`.
     ///
-    pub def thenIgnoringRight(p1: Parser[a, b], p2: Parser[c, b], input: Input[b]): ParseResult[a, b] =
-        input |> ((p1 `then` p2) `using` fst)
+    pub def thenIgnoringLeft(p1: Parser[a, b], p2: Parser[c, b]): Parser[c, b] =
+        (p1 `then` p2) `using` snd
 
     ///
-    /// Returns the result of applying `f` to every element of
-    /// the `ParseResult` of `p` on `input`.
+    /// Returns a parser that recognizes the concatenation of
+    /// `p1` and `p2` but discards the result of `p2`.
     ///
-    pub def using(p: Parser[a, b], f: a -> c, input: Input[b]): ParseResult[c, b] =
-        for (
-            (x, rest) <- p(input)
-        ) yield (f(x), rest)
+    pub def thenIgnoringRight(p1: Parser[a, b], p2: Parser[c, b]): Parser[a, b] =
+        (p1 `then` p2) `using` fst
 
     ///
-    /// Returns zero or more results of the parser `p`.
+    /// Returns a parser that applies `f` to all recognized
+    /// values of `p`.
+    ///
+    /// Useful for producing AST nodes.
+    ///
+    pub def using(p: Parser[a, b], f: a -> c): Parser[c, b] =
+        inp ->
+            for (
+                (x, rest) <- p(inp)
+            ) yield (f(x), rest)
+
+    ///
+    /// Returns a parser that recognizes zero or more repetitions
+    /// of `p`.
     ///
     /// Note that it always succeeds, so the result will always
-    /// be non-empty, but the rest of the input may be `Nil`, along
-    /// with the result. I.e. both the recognized input may be `Nil`
-    /// and the unconsumed input may be `Nil`.
+    /// be non-empty, but the rest of the inp may be empty as well as
+    /// the result.
+    /// I.e. both the recognized value of may be empty (but still exist) and
+    /// the unconsumed may be empty (but still exist).
     ///
-    /// Equivalent to `A*`.
+    /// Equivalent to `p*`.
     ///
-    pub def many(p: Parser[a, b], input: Input[b]): ParseResult[DelayList[a], b] =
-        let p1 = (p `then` many(p)) `using` cons;
-        otherwise(p1, succeed(ENil), input)
+    pub def many(p: Parser[a, b]): Parser[DelayList[a], b] =
+        inp -> inp // Wrap in lambda so the recursive call does not immediately happen
+            |> (((p `then` many(p)) `using` cons) `otherwise` succeed(ENil))
 
     ///
-    /// Returns one or more results of the parser `p`.
+    /// Returns a parser that recognizes one or more repetitions
+    /// of `p`.
     ///
     /// Note that unlike `many`, this parser may fail, i.e.
-    /// return 0 results.
+    /// not recognize anything.
     ///
-    /// Equivalent to `A+`.
+    /// Equivalent to `p+`.
     ///
-    pub def some(p: Parser[a, b], input: Input[b]): ParseResult[DelayList[a], b] =
-        ((p `then` many(p)) `using` cons)(input)
+    pub def some(p: Parser[a, b]): Parser[DelayList[a], b] =
+        (p `then` many(p)) `using` cons
 
     ///
-    /// Returns one or more `ParseResults` recognizing numbers.
+    /// Returns a parser that recognizes numbers (consecutive integer characters).
+    ///
+    /// All possible parses of the number will be recognized.
+    ///
+    /// E.g. `123` is recognized as `123, 12, 1`.
+    ///
     /// The longest match will be the first result.
     ///
-    pub def number(input: Input[Char]): ParseResult[DelayList[Char], Char] =
+    pub def number(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
         let digit = c -> '0' <= c and c <= '9';
-        input |> some(satisfy(digit))
+        inp |> some(satisfy(digit))
 
     ///
-    /// Returns one or more `ParseResults` recognizing consecutive chars.
+    /// Returns a parser that recognizes words
+    /// (consectutive non-integer, non-whitespace characters).
+    ///
+    /// All possible parses of the word will be recognized.
+    ///
+    /// E.g. `hello` is recognized as `hello, hell, hel, he, h`.
+    ///
     /// The longest match will be the first result.
     ///
-    pub def word(input: Input[Char]): ParseResult[DelayList[Char], Char] =
+    pub def word(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
         let lowercase = c -> 'a' <= c and c <= 'z';
         let uppercase = c -> 'A' <= c and c <= 'Z';
         let letter = c -> lowercase(c) or uppercase(c);
-        input |> some(satisfy(letter))
+        inp |> some(satisfy(letter))
 
     ///
-    /// Returns a `ParseResult` that recognizes the sequence `lit`.
+    /// Returns a parser that recognizes the sequence `lit`.
+    ///
     /// This is generalization of `literal`.
     ///
-    pub def literalSequence(lit: m[a], input: Input[a]): ParseResult[DelayList[a], a] with Eq[a], Foldable[m] =
-        let p = match Foldable.toList(lit) {
-            case Nil     => succeed(ENil)
-            case x :: xs => (literal(x) `then` (literalSequence(xs))) `using` cons
-        };
-        p(input)
+    pub def literalSequence(lit: m[a]): Parser[DelayList[a], a] with Eq[a], Foldable[m] =
+        inp -> inp // Wrap in lambda so the recursive call does not immediately happen
+            |> match Foldable.toList(lit) {
+                case Nil     => succeed(ENil)
+                case x :: xs => (literal(x) `then` (literalSequence(xs))) `using` cons
+            }
 
     ///
-    /// Returns a `ParseResult` containing the value `c` if `p` is succesful.
+    /// Returns parser that returns the the value `c` if `p` is succesful.
     ///
-    pub def return(p: Parser[a, b], c: c, input: Input[b]): ParseResult[c, b] =
+    pub def return(p: Parser[a, b], c: c): Parser[c, b] =
         let const = (x, _) -> x;
-        (p `using` (const(c)))(input)
+        p `using` const(c)
 
     ///
-    /// Returns a `ParseResult` that recognizes the string `s`.
+    /// Returns a parser that recognizes the string `s`.
     ///
     pub def string(s: String): Parser[DelayList[Char], Char] =
-        (String.toList >> literalSequence)(s)
+        s |> (String.toList >> literalSequence)
 
     ///
-    /// Returns a `ParseResult` where white-space
-    /// has been removed on both sides of `p`.
+    /// Returns a parser that ignores whitespace on both
+    /// sides of `p`.
     ///
     pub def nibble(p: Parser[a, Char]): Parser[a, Char] =
         whitespace `thenIgnoringLeft` p `thenIgnoringRight` whitespace
 
     ///
-    /// Returns a `ParseResult` that recognizes whitespace.
+    /// Returns a parser that recognizes whitespace.
     ///
-    pub def whitespace(input: Input[Char]): ParseResult[DelayList[Char], Char] =
+    pub def whitespace(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
         let chars = String.toList(" \t\n");
-        input |> (many(any(literal, chars)))
+        inp |> (many(any(literal, chars)))
 
     ///
-    /// Returns a `ParseResult` that recognizes any of the elements in `syms`.
+    /// Returns a parser that recognizes any of the elements in `syms`.
     ///
-    pub def any(f: a -> Parser[b, c], syms: m[a], input: Input[c]): ParseResult[b, c] with Foldable[m] =
-        input |> Foldable.foldRight(f >> otherwise, fail, syms)
+    pub def any(f: a -> Parser[b, c], syms: m[a]): Parser[b, c] with Foldable[m] =
+        Foldable.foldRight(f >> otherwise, fail, syms)
 
     ///
     /// Returns the string `s` as an `Input` type.
