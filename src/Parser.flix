@@ -224,7 +224,7 @@ namespace Parser {
     ///
     pub def stringify(chars: m[Char]): String with Foldable[m] = region r {
         use Foldable.iterator;
-        let sb = new StringBuilder(r);
+        let sb = StringBuilder.new(r);
         foreach (c <- iterator(r, chars)) StringBuilder.append!(c, sb);
         StringBuilder.toString(sb)
     }
