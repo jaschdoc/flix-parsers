@@ -221,9 +221,8 @@ namespace Parser {
     /// Returns `chars` as a string.
     ///
     pub def stringify(chars: List[Char]): String = region r {
-        use Foldable.iterator;
-        let sb = new StringBuilder(r);
-        foreach (c <- iterator(r, chars)) StringBuilder.append!(c, sb);
+        let sb = StringBuilder.new(r);
+        foreach (c <- chars) StringBuilder.append!(c, sb);
         StringBuilder.toString(sb)
     }
 
