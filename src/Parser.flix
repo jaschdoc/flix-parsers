@@ -186,8 +186,7 @@ mod Parser {
     /// Returns parser that returns the the value `c` if `p` is succesful.
     ///
     pub def return(p: Parser[a, b], c: c): Parser[c, b] =
-        let const = (x, _) -> x;
-        p `using` const(c)
+        p `using` constant(c)
 
     ///
     /// Returns a parser that recognizes the string `s`.
