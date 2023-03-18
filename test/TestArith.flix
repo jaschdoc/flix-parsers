@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-namespace TestArith {
+mod TestArith {
 
     enum Exp with Eq, ToString, Sendable {
         case Num(Int32),
@@ -25,19 +25,19 @@ namespace TestArith {
     }
 
     def eval(exp0: Exp): Int32 = match exp0 {
-        case Num(n)          => n
-        case Add(exp1, exp2) => eval(exp1) + eval(exp2)
-        case Sub(exp1, exp2) => eval(exp1) - eval(exp2)
-        case Mul(exp1, exp2) => eval(exp1) * eval(exp2)
-        case Div(exp1, exp2) => eval(exp1) / eval(exp2)
+        case Exp.Num(n)          => n
+        case Exp.Add(exp1, exp2) => eval(exp1) + eval(exp2)
+        case Exp.Sub(exp1, exp2) => eval(exp1) - eval(exp2)
+        case Exp.Mul(exp1, exp2) => eval(exp1) * eval(exp2)
+        case Exp.Div(exp1, exp2) => eval(exp1) / eval(exp2)
     }
 
     def show(exp0: Exp): String = match exp0 {
-        case Num(n)          => Int32.toString(n)
-        case Add(exp1, exp2) => "(${show(exp1)} + ${show(exp2)})"
-        case Sub(exp1, exp2) => "(${show(exp1)} - ${show(exp2)})"
-        case Mul(exp1, exp2) => "(${show(exp1)} * ${show(exp2)})"
-        case Div(exp1, exp2) => "(${show(exp1)} / ${show(exp2)})"
+        case Exp.Num(n)          => Int32.toString(n)
+        case Exp.Add(exp1, exp2) => "(${show(exp1)} + ${show(exp2)})"
+        case Exp.Sub(exp1, exp2) => "(${show(exp1)} - ${show(exp2)})"
+        case Exp.Mul(exp1, exp2) => "(${show(exp1)} * ${show(exp2)})"
+        case Exp.Div(exp1, exp2) => "(${show(exp1)} / ${show(exp2)})"
     }
 
     namespace ArithParser {
@@ -47,30 +47,30 @@ namespace TestArith {
         pub def parse(s: String): Option[AExp] =
             let prog = Parser.fromString(s) |> expn;
             debug(prog);
-            prog |> List.head |> Option.map(fst)
+            prog |> DelayList.head |> Option.map(fst)
 
 
         // Each production rule ends with ... `using` func, where func is a function
         // that produces the corresponding AST node.
 
-        def expn(input: List[Char]): ParseResult[AExp, Char] = input |> (
+        def expn(input: Input[Char]): ParseResult[AExp, Char] = input |> (
             ((term `thenIgnoringRight` literal('+') `then` term) `using` plus)  `otherwise`
             ((term `thenIgnoringRight` literal('-') `then` term) `using` minus) `otherwise`
             term
         )
 
-        def term(input: List[Char]): ParseResult[AExp, Char] = input |> (
+        def term(input: Input[Char]): ParseResult[AExp, Char] = input |> (
             ((factor `thenIgnoringRight` literal('*') `then` factor) `using` times)  `otherwise`
             ((factor `thenIgnoringRight` literal('/') `then` factor) `using` divide) `otherwise`
             factor
         )
 
-        def factor(input: List[Char]): ParseResult[AExp, Char] = input |> (
+        def factor(input: Input[Char]): ParseResult[AExp, Char] = input |> (
             (number `using` value) `otherwise`
             (literal('(') `thenIgnoringLeft` expn `thenIgnoringRight` literal(')'))
         )
 
-        def value(nums: List[Char]): AExp =
+        def value(nums: Input[Char]): AExp =
             let optInt = Parser.stringify(nums) |> Int32.fromString;
             match optInt {
                 case Some(n) => AExp.Num(n)

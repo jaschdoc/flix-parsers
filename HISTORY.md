@@ -12,3 +12,6 @@
 
 - All functions do not carry the last parameter, and instead return a lambda to make the API more readable.
 - Includes basic parser combinators so one should be able to write a few useful grammars with the library.
+
+### v0.1.3
+*This release is just to fix compatibility with an upcoming version of the Flix packager. See [https://github.com/flix/flix/issues/5134](https://github.com/flix/flix/issues/5134)*
