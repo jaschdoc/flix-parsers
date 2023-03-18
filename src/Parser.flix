@@ -14,20 +14,22 @@
    limitations under the License.
 */
 
-pub type alias Input[a] = List[a]
+pub type alias Input[a] = DelayList[a]
 
-pub type alias ParseResult[a, b] = List[(a, Input[b])]
+pub type alias ParseResult[a, b] = DelayList[(a, Input[b])]
 
 pub type alias Parser[a, b] = Input[b] -> ParseResult[a, b]
 
-namespace Parser {
+mod Parser {
+
+    use DelayList.{ENil, ECons, LCons, LList};
 
     ///
     /// Returns a parser that always succeeds with value `b`
     /// regardless of input.
     ///
     pub def succeed(a: a): Parser[a, b] =
-        inp -> (a, inp) :: Nil
+        inp -> ECons((a, inp), ENil)
 
     ///
     /// Returns a parser that always fails regardless of input.
@@ -35,7 +37,7 @@ namespace Parser {
     /// Equivalent to the empty string ϵ.
     ///
     pub def fail(_: Input[b]): ParseResult[a, b] =
-        Nil
+        ENil
 
     ///
     /// Returns a parser that succeeds with value `x`
@@ -47,9 +49,11 @@ namespace Parser {
     ///
     pub def satisfy(p: a -> Bool): Parser[a, a] =
         inp -> match inp {
-            case Nil             => fail(inp)
-            case x :: xs if p(x) => succeed(x, xs)
-            case _ :: xs         => fail(xs)
+            case ENil                 => fail(inp)
+            case ECons(x, xs) if p(x) => succeed(x,       xs)
+            case LCons(x, xs) if p(x) => succeed(x, force xs)
+            case LList(xs)            => LList(lazy satisfy(p, force xs))
+            case _                    => fail(inp)
         }
 
     ///
@@ -68,7 +72,7 @@ namespace Parser {
     /// Equivalent to `p1` | `p2`.
     ///
     pub def otherwise(p1: Parser[a, b], p2: Parser[a, b]): Parser[a, b] =
-        inp -> p1(inp) ::: p2(inp)
+        inp -> DelayList.append(p1(inp), p2(inp))
 
     ///
     /// Returns a parser that recognizes the concatenation of
@@ -121,9 +125,9 @@ namespace Parser {
     ///
     /// Equivalent to `p*`.
     ///
-    pub def many(p: Parser[a, b]): Parser[List[a], b] =
+    pub def many(p: Parser[a, b]): Parser[DelayList[a], b] =
         inp -> inp // Wrap in lambda so the recursive call does not immediately happen
-            |> (((p `then` many(p)) `using` cons) `otherwise` succeed(Nil))
+            |> (((p `then` many(p)) `using` cons) `otherwise` succeed(ENil))
 
     ///
     /// Returns a parser that recognizes one or more repetitions
@@ -134,7 +138,7 @@ namespace Parser {
     ///
     /// Equivalent to `p+`.
     ///
-    pub def some(p: Parser[a, b]): Parser[List[a], b] =
+    pub def some(p: Parser[a, b]): Parser[DelayList[a], b] =
         (p `then` many(p)) `using` cons
 
     ///
@@ -146,7 +150,7 @@ namespace Parser {
     ///
     /// The longest match will be the first result.
     ///
-    pub def number(inp: Input[Char]): ParseResult[List[Char], Char] =
+    pub def number(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
         let digit = c -> '0' <= c and c <= '9';
         inp |> some(satisfy(digit))
 
@@ -160,7 +164,7 @@ namespace Parser {
     ///
     /// The longest match will be the first result.
     ///
-    pub def word(inp: Input[Char]): ParseResult[List[Char], Char] =
+    pub def word(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
         let lowercase = c -> 'a' <= c and c <= 'z';
         let uppercase = c -> 'A' <= c and c <= 'Z';
         let letter = c -> lowercase(c) or uppercase(c);
@@ -171,12 +175,12 @@ namespace Parser {
     ///
     /// This is generalization of `literal`.
     ///
-    pub def literalSequence(lit: List[a]): Parser[List[a], a] with Eq[a] =
-        inp -> // Wrap in lambda so the recursive call does not immediately happen
-            match lit {
-                case Nil     => succeed(Nil)
+    pub def literalSequence(lit: m[a]): Parser[DelayList[a], a] with Eq[a], Foldable[m] =
+        inp -> inp // Wrap in lambda so the recursive call does not immediately happen
+            |> match Foldable.toList(lit) {
+                case Nil     => succeed(ENil)
                 case x :: xs => (literal(x) `then` (literalSequence(xs))) `using` cons
-            }(inp)
+            }
 
     ///
     /// Returns parser that returns the the value `c` if `p` is succesful.
@@ -188,7 +192,7 @@ namespace Parser {
     ///
     /// Returns a parser that recognizes the string `s`.
     ///
-    pub def string(s: String): Parser[List[Char], Char] =
+    pub def string(s: String): Parser[DelayList[Char], Char] =
         s |> (String.toList >> literalSequence)
 
     ///
@@ -201,28 +205,29 @@ namespace Parser {
     ///
     /// Returns a parser that recognizes whitespace.
     ///
-    pub def whitespace(inp: Input[Char]): ParseResult[List[Char], Char] =
+    pub def whitespace(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
         let chars = String.toList(" \t\n");
         inp |> (many(any(literal, chars)))
 
     ///
     /// Returns a parser that recognizes any of the elements in `syms`.
     ///
-    pub def any(f: a -> Parser[b, c], syms: List[a]): Parser[b, c] =
-        List.foldRight(f >> otherwise, fail, syms)
+    pub def any(f: a -> Parser[b, c], syms: m[a]): Parser[b, c] with Foldable[m] =
+        Foldable.foldRight(f >> otherwise, fail, syms)
 
     ///
     /// Returns the string `s` as an `Input` type.
     ///
     pub def fromString(s: String): Input[Char] =
-        String.toList(s)
+        String.toList(s) |> List.toDelayList
 
     ///
     /// Returns `chars` as a string.
     ///
-    pub def stringify(chars: List[Char]): String = region r {
+    pub def stringify(chars: m[Char]): String with Foldable[m] = region r {
         let sb = StringBuilder.new(r);
-        foreach (c <- chars) StringBuilder.append!(c, sb);
+        let ap = sb |> flip(StringBuilder.append!);
+        Foldable.forEach(ap, chars);
         StringBuilder.toString(sb)
     }
 
@@ -230,7 +235,7 @@ namespace Parser {
     /// Returns the tuple as a list, i.e.
     /// `(x, xs)` is returned as `x :: xs`.
     ///
-    def cons(xs: (a, List[a])): List[a] =
-        fst(xs) :: snd(xs)
+    def cons(xs: (a, DelayList[a])): DelayList[a] =
+        ECons(fst(xs), snd(xs))
 
 }
