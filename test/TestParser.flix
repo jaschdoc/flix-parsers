@@ -14,7 +14,9 @@
    limitations under the License.
 */
 
-namespace TestParser {
+mod TestParser {
+
+    use DelayList.ENil;
 
     use Parser.{succeed, fail, literal, otherwise,
                 then, thenIgnoringLeft, nibble,

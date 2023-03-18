@@ -20,7 +20,9 @@ pub type alias ParseResult[a, b] = DelayList[(a, Input[b])]
 
 pub type alias Parser[a, b] = Input[b] -> ParseResult[a, b]
 
-namespace Parser {
+mod Parser {
+
+    use DelayList.{ENil, ECons, LCons, LList};
 
     ///
     /// Returns a parser that always succeeds with value `b`

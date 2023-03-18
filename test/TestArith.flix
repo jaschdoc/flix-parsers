@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-namespace TestArith {
+mod TestArith {
 
     enum Exp with Eq, ToString, Sendable {
         case Num(Int32),
