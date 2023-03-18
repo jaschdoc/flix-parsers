@@ -25,19 +25,19 @@ namespace TestArith {
     }
 
     def eval(exp0: Exp): Int32 = match exp0 {
-        case Num(n)          => n
-        case Add(exp1, exp2) => eval(exp1) + eval(exp2)
-        case Sub(exp1, exp2) => eval(exp1) - eval(exp2)
-        case Mul(exp1, exp2) => eval(exp1) * eval(exp2)
-        case Div(exp1, exp2) => eval(exp1) / eval(exp2)
+        case Exp.Num(n)          => n
+        case Exp.Add(exp1, exp2) => eval(exp1) + eval(exp2)
+        case Exp.Sub(exp1, exp2) => eval(exp1) - eval(exp2)
+        case Exp.Mul(exp1, exp2) => eval(exp1) * eval(exp2)
+        case Exp.Div(exp1, exp2) => eval(exp1) / eval(exp2)
     }
 
     def show(exp0: Exp): String = match exp0 {
-        case Num(n)          => Int32.toString(n)
-        case Add(exp1, exp2) => "(${show(exp1)} + ${show(exp2)})"
-        case Sub(exp1, exp2) => "(${show(exp1)} - ${show(exp2)})"
-        case Mul(exp1, exp2) => "(${show(exp1)} * ${show(exp2)})"
-        case Div(exp1, exp2) => "(${show(exp1)} / ${show(exp2)})"
+        case Exp.Num(n)          => Int32.toString(n)
+        case Exp.Add(exp1, exp2) => "(${show(exp1)} + ${show(exp2)})"
+        case Exp.Sub(exp1, exp2) => "(${show(exp1)} - ${show(exp2)})"
+        case Exp.Mul(exp1, exp2) => "(${show(exp1)} * ${show(exp2)})"
+        case Exp.Div(exp1, exp2) => "(${show(exp1)} / ${show(exp2)})"
     }
 
     namespace ArithParser {
