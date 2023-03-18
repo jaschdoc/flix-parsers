@@ -49,6 +49,8 @@ mod TestArith {
             debug(prog |> DelayList.map(match (a, dl) -> (a, DelayList.toList(dl))) |> DelayList.toList);
             prog |> DelayList.head |> Option.map(fst)
 
+        // TODO: Write tests for each parser: factor, term, exp
+        // Do this for each parser combined by `otherwise`.
 
         // Each production rule ends with ... `using` func, where func is a function
         // that produces the corresponding AST node.
