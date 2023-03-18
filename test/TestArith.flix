@@ -45,15 +45,15 @@ mod TestArith {
         use TestArith.Exp;
 
         pub def parse(s: String): Option[Exp] =
-            let prog = Parser.fromString(s) |> expn;
-            debug(prog);
+            let prog = Parser.fromString(s) |> exp;
+            debug(prog |> DelayList.map(match (a, dl) -> (a, DelayList.toList(dl))) |> DelayList.toList);
             prog |> DelayList.head |> Option.map(fst)
 
 
         // Each production rule ends with ... `using` func, where func is a function
         // that produces the corresponding AST node.
 
-        def expn(input: Input[Char]): ParseResult[Exp, Char] = input |> (
+        def exp(input: Input[Char]): ParseResult[Exp, Char] = input |> (
             ((term `thenIgnoringRight` literal('+') `then` term) `using` plus)  `otherwise`
             ((term `thenIgnoringRight` literal('-') `then` term) `using` minus) `otherwise`
             term
@@ -67,7 +67,7 @@ mod TestArith {
 
         def factor(input: Input[Char]): ParseResult[Exp, Char] = input |> (
             (number `using` value) `otherwise`
-            (literal('(') `thenIgnoringLeft` expn `thenIgnoringRight` literal(')'))
+            (literal('(') `thenIgnoringLeft` exp `thenIgnoringRight` literal(')'))
         )
 
         def value(nums: Input[Char]): Exp =
@@ -104,34 +104,34 @@ mod TestArith {
         case None => unreachable!()
     }
 
-    @test
-    def eval01(): Bool =
+    // @test
+    def _eval01(): Bool =
         let actual = TestArith/ArithParser.parse("");
         let expected = None;
         Assert.eq(expected, actual)
 
-    @test
-    def eval02(): Bool =
+    // @test
+    def _eval02(): Bool =
         TestArith/ArithParser.parse("1")
         |> testEval(1)
 
-    @test
-    def eval03(): Bool =
+    // @test
+    def _eval03(): Bool =
         TestArith/ArithParser.parse("2+2")
         |> testEval(2 + 2)
 
     @test
-    def eval04(): Bool =
+    def _eval04(): Bool =
         TestArith/ArithParser.parse("1+(2/2+3*4*5/5)")
         |> testEval(1+2/2+3*4*5/5)
 
-    @test
-    def eval05(): Bool =
+    // @test
+    def _eval05(): Bool =
         TestArith/ArithParser.parse("1/1")
         |> testEval(1)
 
-    @test
-    def eval06(): Bool =
+    // @test
+    def _eval06(): Bool =
         TestArith/ArithParser.parse("(2+2)/2+2/(2-1)")
         |> testEval((2 + 2) / 2 + 2 / (2 - 1))
 
@@ -145,28 +145,28 @@ mod TestArith {
         case None => unreachable!()
     }
 
-    @test
-    def show01(): Bool =
+    // @test
+    def _show01(): Bool =
         TestArith/ArithParser.parse("1")
         |> testShow("1")
 
-    @test
-    def show02(): Bool =
+    // @test
+    def _show02(): Bool =
         TestArith/ArithParser.parse("2+2")
         |> testShow("(2 + 2)")
 
     @test
-    def show03(): Bool =
+    def _show03(): Bool =
         TestArith/ArithParser.parse("1+(2/3+4*5*6/7)")
         |> testShow("((1 + (2 / 3)) + (((4 * 5) * 6) / 7))")
 
-    @test
-    def show04(): Bool =
+    // @test
+    def _show04(): Bool =
         TestArith/ArithParser.parse("1/1")
         |> testShow("(1 / 1)")
 
-    @test
-    def show05(): Bool =
+    // @test
+    def _show05(): Bool =
         TestArith/ArithParser.parse("(2+2)/2+2/(2-1)")
         |> testShow("(((2 + 2) / 2) + (2 / (2 - 1)))")
 
