@@ -40,7 +40,7 @@ mod TestArith {
         case Exp.Div(exp1, exp2) => "(${show(exp1)} / ${show(exp2)})"
     }
 
-    namespace ArithParser {
+    mod ArithParser {
         use Parser.{number, literal, using, otherwise, then, thenIgnoringLeft, thenIgnoringRight};
         use TestArith.{Exp => AExp};
 
