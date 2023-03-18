@@ -156,7 +156,7 @@ mod Parser {
 
     ///
     /// Returns a parser that recognizes words
-    /// (consectutive non-integer, non-whitespace characters).
+    /// (consecutive non-integer, non-whitespace characters).
     ///
     /// All possible parses of the word will be recognized.
     ///
