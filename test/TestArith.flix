@@ -40,7 +40,7 @@ mod TestArith {
         case Exp.Div(exp1, exp2) => "(${show(exp1)} / ${show(exp2)})"
     }
 
-    namespace ArithParser {
+    mod ArithParser {
         use Parser.{number, literal, using, otherwise, then, thenIgnoringLeft, thenIgnoringRight};
         use TestArith.{Exp => AExp};
 
@@ -98,13 +98,13 @@ mod TestArith {
 
     @test
     def eval01(): Bool =
-        let actual = TestArith/ArithParser.parse("");
+        let actual = TestArith.ArithParser.parse("");
         let expected = None;
         Assert.eq(expected, actual)
 
     @test
     def eval02(): Bool =
-        let prog = TestArith/ArithParser.parse("1");
+        let prog = TestArith.ArithParser.parse("1");
         match prog {
             case Some(e) =>
                 let actual = eval(e);
@@ -115,7 +115,7 @@ mod TestArith {
 
     @test
     def eval03(): Bool =
-        let prog = TestArith/ArithParser.parse("2+2");
+        let prog = TestArith.ArithParser.parse("2+2");
         match prog {
             case Some(e) =>
                 let actual = eval(e);
@@ -131,7 +131,7 @@ mod TestArith {
 
     @test
     def show01(): Bool =
-        let prog = TestArith/ArithParser.parse("1");
+        let prog = TestArith.ArithParser.parse("1");
         match prog {
             case Some(e) =>
                 let actual = show(e);
@@ -142,7 +142,7 @@ mod TestArith {
 
     @test
     def show02(): Bool =
-        let prog = TestArith/ArithParser.parse("2+2");
+        let prog = TestArith.ArithParser.parse("2+2");
         match prog {
             case Some(e) =>
                 let actual = show(e);
