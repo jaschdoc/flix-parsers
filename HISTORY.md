@@ -24,3 +24,10 @@
 - Removes use of `new` keyword.
 - Removes use of `foreach` loop.
 - Updated namespaces to use new `mod` keyword and qualified tags.
+
+### v0.1.5
+
+*This is release fixes compatibility with the latest version of Flix.*
+
+- Removes `namespace` keyword (uses `mod` instead).
+- Uses `.` as namespace separator instead of `/`.
