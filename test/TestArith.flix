@@ -121,6 +121,14 @@ mod TestArith {
         pub def term04(): Bool =
             Assert.eq(Some(Exp.Div(Exp.Num(2), Exp.Num(3))), term(Parser.fromString("(2/3)")) |> DelayList.head |> Option.map(fst))
 
+        @Test
+        pub def term05(): Bool =
+            Assert.eq(Some(Exp.Num(42)), term(Parser.fromString("42")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def term06(): Bool =
+            Assert.eq(Some(Exp.Num(42)), term(Parser.fromString("(42)")) |> DelayList.head |> Option.map(fst))
+
     }
 
 
