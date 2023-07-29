@@ -152,7 +152,7 @@ mod TestArith {
 
         @Test
         pub def exp06(): Bool =
-            Assert.eq(Some(Exp.Add(Exp.Num(42), Exp.Add(Exp.Num(2), Exp.Num(3)))), exp(Parser.fromString("5+2+3")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Add(Exp.Num(5), Exp.Add(Exp.Num(2), Exp.Num(3)))), exp(Parser.fromString("5+(2+3)")) |> DelayList.head |> Option.map(fst))
 
     }
 
@@ -184,7 +184,7 @@ mod TestArith {
 
     @Test
     pub def eval04(): Bool =
-        ArithParser.parse("1+(2/2+3*4*5/5)")
+        ArithParser.parse("1+(2/2+3*(4*(5/5)))")
         |> testEval(1+2/2+3*4*5/5)
 
     @Test
@@ -219,8 +219,8 @@ mod TestArith {
 
     @Test
     pub def show03(): Bool =
-        ArithParser.parse("1+(2/3+4*5*6/7)")
-        |> testShow("((1 + (2 / 3)) + (((4 * 5) * 6) / 7))")
+        ArithParser.parse("1+(2/3+4*(5*(6/7)))")
+        |> testShow("(1 + ((2 / 3) + (4 * (5 * (6 / 7)))))")
 
     @Test
     pub def show04(): Bool =
