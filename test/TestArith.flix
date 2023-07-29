@@ -46,7 +46,6 @@ mod TestArith {
 
         pub def parse(s: String): Option[Exp] =
             let prog = Parser.fromString(s) |> exp;
-            debug(prog |> DelayList.map(match (a, dl) -> (a, DelayList.toList(dl))) |> DelayList.toList);
             prog |> DelayList.head |> Option.map(fst)
 
         // Each production rule ends with ... `using` func, where func is a function
