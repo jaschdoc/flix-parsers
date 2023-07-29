@@ -51,7 +51,6 @@ mod TestArith {
         // Each production rule ends with ... `using` func, where func is a function
         // that produces the corresponding AST node.
 
-        // Add `some` function?
         def exp(input: Input[Char]): ParseResult[Exp, Char] = input |> (
             ((term `thenIgnoringRight` literal('+') `then` term) `using` plus)  `otherwise`
             ((term `thenIgnoringRight` literal('-') `then` term) `using` minus) `otherwise`
@@ -91,7 +90,6 @@ mod TestArith {
         def divide(exp: (Exp, Exp)): Exp = match exp {
             case (left, right) => Exp.Div(left, right)
         }
-
 
         @Test
         pub def factor01(): Bool =
