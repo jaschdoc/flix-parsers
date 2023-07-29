@@ -129,6 +129,30 @@ mod TestArith {
         pub def term06(): Bool =
             Assert.eq(Some(Exp.Num(42)), term(Parser.fromString("(42)")) |> DelayList.head |> Option.map(fst))
 
+        @Test
+        pub def exp01(): Bool =
+            Assert.eq(Some(Exp.Add(Exp.Num(5), Exp.Num(9))), exp(Parser.fromString("5+9")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def exp02(): Bool =
+            Assert.eq(Some(Exp.Add(Exp.Num(5), Exp.Num(9))), exp(Parser.fromString("(5+9)")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def exp03(): Bool =
+            Assert.eq(Some(Exp.Sub(Exp.Num(5), Exp.Num(9))), exp(Parser.fromString("5-9")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def exp04(): Bool =
+            Assert.eq(Some(Exp.Sub(Exp.Num(5), Exp.Num(9))), exp(Parser.fromString("(5-9)")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def exp05(): Bool =
+            Assert.eq(Some(Exp.Mul(Exp.Num(42), Exp.Num(2))), exp(Parser.fromString("42*2")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def exp06(): Bool =
+            Assert.eq(Some(Exp.Add(Exp.Num(42), Exp.Add(Exp.Num(2), Exp.Num(3)))), exp(Parser.fromString("5+2+3")) |> DelayList.head |> Option.map(fst))
+
     }
 
 
