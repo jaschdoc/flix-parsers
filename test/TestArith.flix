@@ -93,63 +93,66 @@ mod TestArith {
 
         @Test
         pub def factor01(): Bool =
-            Assert.eq(Some(Exp.Num(1)), factor(Parser.fromString("1")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Num(1)), testParser(factor, "1"))
 
         @Test
         pub def factor02(): Bool =
-            Assert.eq(Some(Exp.Num(1)), factor(Parser.fromString("(1)")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Num(1)), testParser(factor, "(1)"))
 
         @Test
         pub def factor03(): Bool =
-            Assert.eq(Some(Exp.Num(23)), factor(Parser.fromString("(23)")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Num(23)), testParser(factor, "(23)"))
 
         @Test
         pub def term01(): Bool =
-            Assert.eq(Some(Exp.Mul(Exp.Num(2), Exp.Num(3))), term(Parser.fromString("2*3")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Mul(Exp.Num(2), Exp.Num(3))), testParser(term, "2*3"))
 
         @Test
         pub def term02(): Bool =
-            Assert.eq(Some(Exp.Mul(Exp.Num(2), Exp.Num(3))), term(Parser.fromString("(2*3)")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Mul(Exp.Num(2), Exp.Num(3))), testParser(term, "(2*3)"))
 
         @Test
         pub def term03(): Bool =
-            Assert.eq(Some(Exp.Div(Exp.Num(2), Exp.Num(3))), term(Parser.fromString("2/3")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Div(Exp.Num(2), Exp.Num(3))), testParser(term, "2/3"))
 
         @Test
         pub def term04(): Bool =
-            Assert.eq(Some(Exp.Div(Exp.Num(2), Exp.Num(3))), term(Parser.fromString("(2/3)")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Div(Exp.Num(2), Exp.Num(3))), testParser(term, "(2/3)"))
 
         @Test
         pub def term05(): Bool =
-            Assert.eq(Some(Exp.Num(42)), term(Parser.fromString("42")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Num(42)), testParser(term, "42"))
 
         @Test
         pub def term06(): Bool =
-            Assert.eq(Some(Exp.Num(42)), term(Parser.fromString("(42)")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Num(42)), testParser(term, "(42)"))
 
         @Test
         pub def exp01(): Bool =
-            Assert.eq(Some(Exp.Add(Exp.Num(5), Exp.Num(9))), exp(Parser.fromString("5+9")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Add(Exp.Num(5), Exp.Num(9))), testParser(exp, "5+9"))
 
         @Test
         pub def exp02(): Bool =
-            Assert.eq(Some(Exp.Add(Exp.Num(5), Exp.Num(9))), exp(Parser.fromString("(5+9)")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Add(Exp.Num(5), Exp.Num(9))), testParser(exp, "(5+9)"))
 
         @Test
         pub def exp03(): Bool =
-            Assert.eq(Some(Exp.Sub(Exp.Num(5), Exp.Num(9))), exp(Parser.fromString("5-9")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Sub(Exp.Num(5), Exp.Num(9))), testParser(exp, "5-9"))
 
         @Test
         pub def exp04(): Bool =
-            Assert.eq(Some(Exp.Sub(Exp.Num(5), Exp.Num(9))), exp(Parser.fromString("(5-9)")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Sub(Exp.Num(5), Exp.Num(9))), testParser(exp, "(5-9)"))
 
         @Test
         pub def exp05(): Bool =
-            Assert.eq(Some(Exp.Mul(Exp.Num(42), Exp.Num(2))), exp(Parser.fromString("42*2")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Mul(Exp.Num(42), Exp.Num(2))), testParser(exp, "42*2"))
 
         @Test
         pub def exp06(): Bool =
-            Assert.eq(Some(Exp.Add(Exp.Num(5), Exp.Add(Exp.Num(2), Exp.Num(3)))), exp(Parser.fromString("5+(2+3)")) |> DelayList.head |> Option.map(fst))
+            Assert.eq(Some(Exp.Add(Exp.Num(5), Exp.Add(Exp.Num(2), Exp.Num(3)))), testParser(exp, "5+(2+3)"))
+
+        def testParser(p: Input[Char] -> ParseResult[Exp, Char], inp: String): Option[Exp] =
+            p(Parser.fromString(inp)) |> DelayList.head |> Option.map(fst)
 
     }
 
