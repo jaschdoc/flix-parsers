@@ -49,9 +49,6 @@ mod TestArith {
             debug(prog |> DelayList.map(match (a, dl) -> (a, DelayList.toList(dl))) |> DelayList.toList);
             prog |> DelayList.head |> Option.map(fst)
 
-        // TODO: Write tests for each parser: factor, term, exp
-        // Do this for each parser combined by `otherwise`.
-
         // Each production rule ends with ... `using` func, where func is a function
         // that produces the corresponding AST node.
 
@@ -94,6 +91,36 @@ mod TestArith {
         def divide(exp: (Exp, Exp)): Exp = match exp {
             case (left, right) => Exp.Div(left, right)
         }
+
+
+        @Test
+        pub def factor01(): Bool =
+            Assert.eq(Some(Exp.Num(1)), factor(Parser.fromString("1")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def factor02(): Bool =
+            Assert.eq(Some(Exp.Num(1)), factor(Parser.fromString("(1)")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def factor03(): Bool =
+            Assert.eq(Some(Exp.Num(23)), factor(Parser.fromString("(23)")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def term01(): Bool =
+            Assert.eq(Some(Exp.Mul(Exp.Num(2), Exp.Num(3))), term(Parser.fromString("2*3")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def term02(): Bool =
+            Assert.eq(Some(Exp.Mul(Exp.Num(2), Exp.Num(3))), term(Parser.fromString("(2*3)")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def term03(): Bool =
+            Assert.eq(Some(Exp.Div(Exp.Num(2), Exp.Num(3))), term(Parser.fromString("2/3")) |> DelayList.head |> Option.map(fst))
+
+        @Test
+        pub def term04(): Bool =
+            Assert.eq(Some(Exp.Div(Exp.Num(2), Exp.Num(3))), term(Parser.fromString("(2/3)")) |> DelayList.head |> Option.map(fst))
+
     }
 
 
@@ -103,38 +130,38 @@ mod TestArith {
 
     def testEval(expected: Int32, prog: Option[Exp]): Bool = match prog {
         case Some(e) => Assert.eq(expected, eval(e))
-        case None => unreachable!()
+        case None    => unreachable!()
     }
 
-    // @test
-    def _eval01(): Bool =
-        let actual = TestArith/ArithParser.parse("");
+    @Test
+    pub def eval01(): Bool =
+        let actual = ArithParser.parse("");
         let expected = None;
         Assert.eq(expected, actual)
 
-    // @test
-    def _eval02(): Bool =
-        TestArith/ArithParser.parse("1")
+    @Test
+    pub def eval02(): Bool =
+        ArithParser.parse("1")
         |> testEval(1)
 
-    // @test
-    def _eval03(): Bool =
-        TestArith/ArithParser.parse("2+2")
+    @Test
+    pub def eval03(): Bool =
+        ArithParser.parse("2+2")
         |> testEval(2 + 2)
 
-    @test
-    def _eval04(): Bool =
-        TestArith/ArithParser.parse("1+(2/2+3*4*5/5)")
+    @Test
+    pub def eval04(): Bool =
+        ArithParser.parse("1+(2/2+3*4*5/5)")
         |> testEval(1+2/2+3*4*5/5)
 
-    // @test
-    def _eval05(): Bool =
-        TestArith/ArithParser.parse("1/1")
+    @Test
+    pub def eval05(): Bool =
+        ArithParser.parse("1/1")
         |> testEval(1)
 
-    // @test
-    def _eval06(): Bool =
-        TestArith/ArithParser.parse("(2+2)/2+2/(2-1)")
+    @Test
+    pub def eval06(): Bool =
+        ArithParser.parse("(2+2)/2+2/(2-1)")
         |> testEval((2 + 2) / 2 + 2 / (2 - 1))
 
 
@@ -144,32 +171,32 @@ mod TestArith {
 
     def testShow(expected: String, prog: Option[Exp]): Bool = match prog {
         case Some(e) => Assert.eq(expected, show(e))
-        case None => unreachable!()
+        case None    => unreachable!()
     }
 
-    // @test
-    def _show01(): Bool =
-        TestArith/ArithParser.parse("1")
+    @Test
+    pub def show01(): Bool =
+        ArithParser.parse("1")
         |> testShow("1")
 
-    // @test
-    def _show02(): Bool =
-        TestArith/ArithParser.parse("2+2")
+    @Test
+    pub def show02(): Bool =
+        ArithParser.parse("2+2")
         |> testShow("(2 + 2)")
 
-    @test
-    def _show03(): Bool =
-        TestArith/ArithParser.parse("1+(2/3+4*5*6/7)")
+    @Test
+    pub def show03(): Bool =
+        ArithParser.parse("1+(2/3+4*5*6/7)")
         |> testShow("((1 + (2 / 3)) + (((4 * 5) * 6) / 7))")
 
-    // @test
-    def _show04(): Bool =
-        TestArith/ArithParser.parse("1/1")
+    @Test
+    pub def show04(): Bool =
+        ArithParser.parse("1/1")
         |> testShow("(1 / 1)")
 
-    // @test
-    def _show05(): Bool =
-        TestArith/ArithParser.parse("(2+2)/2+2/(2-1)")
+    @Test
+    pub def show05(): Bool =
+        ArithParser.parse("(2+2)/2+2/(2-1)")
         |> testShow("(((2 + 2) / 2) + (2 / (2 - 1)))")
 
 }
