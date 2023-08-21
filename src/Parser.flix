@@ -14,6 +14,8 @@
    limitations under the License.
 */
 
+pub enum Position[a](a, Int32, Int32)
+
 pub type alias Input[a] = DelayList[a]
 
 pub type alias ParseResult[a, b] = DelayList[(a, Input[b])]
