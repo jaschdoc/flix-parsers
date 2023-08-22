@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-pub enum Position[a](a, Int32, Int32)
+pub enum Position[a](a, Int32, Int32) with ToString, Eq
 
 pub type alias Input[a] = DelayList[a]
 
@@ -25,6 +25,7 @@ pub type alias Parser[a, b] = Input[b] -> ParseResult[a, b]
 mod Parser {
 
     use DelayList.{ENil, ECons, LCons, LList};
+    use Position.Position;
 
     ///
     /// Returns a parser that always succeeds with value `b`
@@ -49,13 +50,13 @@ mod Parser {
     ///
     /// The parser fails otherwise.
     ///
-    pub def satisfy(p: a -> Bool): Parser[a, a] =
+    pub def satisfy(p: a -> Bool): Parser[a, Position[a]] =
         inp -> match inp {
-            case ENil                 => fail(inp)
-            case ECons(x, xs) if p(x) => succeed(x,       xs)
-            case LCons(x, xs) if p(x) => succeed(x, force xs)
-            case LList(xs)            => LList(lazy satisfy(p, force xs))
-            case _                    => fail(inp)
+            case ENil                                 => fail(inp)
+            case ECons(Position(x, _, _), xs) if p(x) => succeed(x,       xs)
+            case LCons(Position(x, _, _), xs) if p(x) => succeed(x, force xs)
+            case LList(xs)                            => LList(lazy satisfy(p, force xs))
+            case _                                    => fail(inp)
         }
 
     ///
@@ -64,7 +65,7 @@ mod Parser {
     ///
     /// The parser fails otherwise.
     ///
-    pub def literal(a: a): Parser[a, a] with Eq[a] =
+    pub def literal(a: a): Parser[a, Position[a]] with Eq[a] =
         satisfy(Eq.eq(a))
 
     ///
@@ -152,7 +153,7 @@ mod Parser {
     ///
     /// The longest match will be the first result.
     ///
-    pub def number(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
+    pub def number(inp: Input[Char]): ParseResult[DelayList[Char], Position[Char]] =
         let digit = c -> '0' <= c and c <= '9';
         inp |> some(satisfy(digit))
 
@@ -166,7 +167,7 @@ mod Parser {
     ///
     /// The longest match will be the first result.
     ///
-    pub def word(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
+    pub def word(inp: Input[Char]): ParseResult[DelayList[Char], Position[Char]] =
         let lowercase = c -> 'a' <= c and c <= 'z';
         let uppercase = c -> 'A' <= c and c <= 'Z';
         let letter = c -> lowercase(c) or uppercase(c);
