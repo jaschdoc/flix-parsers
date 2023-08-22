@@ -145,6 +145,20 @@ mod Parser {
         (p `then` many(p)) `using` cons
 
     ///
+    ///
+    ///
+    pub def offside(p: Parser[a, Position[b]]): Parser[a, Position[b]] =
+        let onside = match Position(a, r1, c1) -> match Position(b, r2, c2) -> r2 >= r1 and c2 >= c1;
+        inp -> match DelayList.head(inp) {
+            case Some(hd) =>
+                let (inpOn, inpOff) = DelayList.span(onside(hd), inp);
+                for (
+                    (x, rest) <- p(inpOn) |> DelayList.filter(snd >> DelayList.isEmpty)
+                ) yield (x, inpOff)
+            case None => fail(inp)
+        }
+
+    ///
     /// Returns a parser that recognizes numbers (consecutive integer characters).
     ///
     /// All possible parses of the number will be recognized.
