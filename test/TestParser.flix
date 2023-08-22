@@ -29,6 +29,8 @@ mod TestParser {
 
     def noInput(): Input[Char] = ENil
 
+    def noInputWithPos(): Input[Position[Char]] = ENil
+
     def l2d(l: m[a]): DelayList[a] with Foldable[m] = Foldable.toDelayList(l)
 
     def d2l(l: DelayList[a]): List[a] = DelayList.toList(l)
@@ -106,7 +108,7 @@ mod TestParser {
 
     @Test
     def satisfy01(): Bool =
-        let input = noInput();
+        let input = noInputWithPos();
         let actual = Parser.satisfy(a -> a == 'a', input);
         let expected = pr(Nil);
         Assert.eq(expected, actual)
