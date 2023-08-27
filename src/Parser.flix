@@ -207,7 +207,7 @@ mod Parser {
 
 
     ///
-    ///
+    /// Returns the input with corresponding source positions.
     ///
     pub def prelex(inp: Input[Char]): Input[Position[Char]] = {
         def tab(c) = ((c / 8) + 1) * 8;
