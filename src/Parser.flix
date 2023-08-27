@@ -235,6 +235,9 @@ mod Parser {
         visit(0, 0, inp, identity)
     }
 
+    ///
+    ///
+    ///
     pub def tok(f: Input[Char] -> b, p: Parser[Position[Char], Char]): Parser[Position[Token[b, Input[Char]]], Position[Char]] =
         inp -> match DelayList.head(inp) {
             case Some(Position(_, r, c)) =>
