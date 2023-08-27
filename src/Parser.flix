@@ -16,6 +16,8 @@
 
 pub enum Position[a](a, Int32, Int32) with ToString, Eq
 
+pub enum Token[a, b](a, b) with ToString, Eq
+
 pub type alias Input[a] = DelayList[a]
 
 pub type alias ParseResult[a, b] = DelayList[(a, Input[b])]
@@ -232,6 +234,17 @@ mod Parser {
         };
         visit(0, 0, inp, identity)
     }
+
+    pub def tok(f: Input[Char] -> b, p: Parser[Position[Char], Char]): Parser[Position[Token[b, Input[Char]]], Position[Char]] =
+        inp -> match DelayList.head(inp) {
+            case Some(Position(_, r, c)) =>
+                for (
+                    (xs, rest) <- p(inp);
+                    l <- f(xs)
+                ) yield (Position(Token(l, xs), r, c), rest)
+
+            case None => fail(inp)
+        }
 
     ///
     /// Returns a parser that recognizes the string `s`.
