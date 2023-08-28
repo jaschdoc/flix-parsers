@@ -14,6 +14,10 @@
    limitations under the License.
 */
 
+pub enum Position[a](a, Int32, Int32) with ToString, Eq
+
+pub enum Token[a, b](a, b) with ToString, Eq
+
 pub type alias Input[a] = DelayList[a]
 
 pub type alias ParseResult[a, b] = DelayList[(a, Input[b])]
@@ -23,6 +27,7 @@ pub type alias Parser[a, b] = Input[b] -> ParseResult[a, b]
 mod Parser {
 
     use DelayList.{ENil, ECons, LCons, LList};
+    use Position.Position;
 
     ///
     /// Returns a parser that always succeeds with value `b`
@@ -47,13 +52,13 @@ mod Parser {
     ///
     /// The parser fails otherwise.
     ///
-    pub def satisfy(p: a -> Bool): Parser[a, a] =
+    pub def satisfy(p: a -> Bool): Parser[a, Position[a]] =
         inp -> match inp {
-            case ENil                 => fail(inp)
-            case ECons(x, xs) if p(x) => succeed(x,       xs)
-            case LCons(x, xs) if p(x) => succeed(x, force xs)
-            case LList(xs)            => LList(lazy satisfy(p, force xs))
-            case _                    => fail(inp)
+            case ENil                                 => fail(inp)
+            case ECons(Position(x, _, _), xs) if p(x) => succeed(x,       xs)
+            case LCons(Position(x, _, _), xs) if p(x) => succeed(x, force xs)
+            case LList(xs)                            => LList(lazy satisfy(p, force xs))
+            case _                                    => fail(inp)
         }
 
     ///
@@ -62,7 +67,7 @@ mod Parser {
     ///
     /// The parser fails otherwise.
     ///
-    pub def literal(a: a): Parser[a, a] with Eq[a] =
+    pub def literal(a: a): Parser[a, Position[a]] with Eq[a] =
         satisfy(Eq.eq(a))
 
     ///
@@ -142,6 +147,20 @@ mod Parser {
         (p `then` many(p)) `using` cons
 
     ///
+    ///
+    ///
+    pub def offside(p: Parser[a, Position[b]]): Parser[a, Position[b]] =
+        let onside = match Position(_, r1, c1) -> match Position(_, r2, c2) -> r2 >= r1 and c2 >= c1;
+        inp -> match DelayList.head(inp) {
+            case Some(hd) =>
+                let (inpOn, inpOff) = DelayList.span(onside(hd), inp);
+                for (
+                    (x, _) <- p(inpOn) |> DelayList.filter(snd >> DelayList.isEmpty)
+                ) yield (x, inpOff)
+            case None => fail(inp)
+        }
+
+    ///
     /// Returns a parser that recognizes numbers (consecutive integer characters).
     ///
     /// All possible parses of the number will be recognized.
@@ -150,7 +169,7 @@ mod Parser {
     ///
     /// The longest match will be the first result.
     ///
-    pub def number(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
+    pub def number(inp: Input[Char]): ParseResult[DelayList[Char], Position[Char]] =
         let digit = c -> '0' <= c and c <= '9';
         inp |> some(satisfy(digit))
 
@@ -164,7 +183,7 @@ mod Parser {
     ///
     /// The longest match will be the first result.
     ///
-    pub def word(inp: Input[Char]): ParseResult[DelayList[Char], Char] =
+    pub def word(inp: Input[Char]): ParseResult[DelayList[Char], Position[Char]] =
         let lowercase = c -> 'a' <= c and c <= 'z';
         let uppercase = c -> 'A' <= c and c <= 'Z';
         let letter = c -> lowercase(c) or uppercase(c);
@@ -187,6 +206,48 @@ mod Parser {
     ///
     pub def return(p: Parser[a, b], c: c): Parser[c, b] =
         p `using` constant(c)
+
+
+    ///
+    /// Returns the input with corresponding source positions.
+    ///
+    pub def prelex(inp: Input[Char]): Input[Position[Char]] = {
+        def tab(c) = ((c / 8) + 1) * 8;
+        def visit(r, c, i, k) = match i {
+            case ENil            => k(ENil)
+            case ECons('\t', xs) => visit(r, tab(c), xs, ks -> k(ECons(Position('\t', r, c), ks)))
+            case ECons('\n', xs) => visit(r + 1, c,  xs, ks -> k(ECons(Position('\n', r, c), ks)))
+            case ECons(x, xs)    => visit(r, c + 1,  xs, ks -> k(ECons(Position('\n', r, c), ks)))
+            case LCons('\t', xs) =>
+                let x = Position('\t', r, c);
+                LCons(x, lazy visit(r, tab(c), force xs, ks -> k(ECons(x, ks))))
+
+            case LCons('\n', xs) =>
+                let x = Position('\n', r, c);
+                LCons(x, lazy visit(r + 1, c, force xs, ks -> k(ECons(x, ks))))
+
+            case LCons(x, xs) =>
+                let p = Position(x, r, c);
+                LCons(p, lazy visit(r, c + 1, force xs, ks -> k(ECons(p, ks))))
+
+            case LList(xs) => LList(lazy visit(r, c, force xs, k))
+        };
+        visit(0, 0, inp, identity)
+    }
+
+    ///
+    ///
+    ///
+    pub def tok(f: Input[Char] -> b, p: Parser[Position[Char], Char]): Parser[Position[Token[b, Input[Char]]], Position[Char]] =
+        inp -> match DelayList.head(inp) {
+            case Some(Position(_, r, c)) =>
+                for (
+                    (xs, rest) <- p(inp);
+                    l <- f(xs)
+                ) yield (Position(Token(l, xs), r, c), rest)
+
+            case None => fail(inp)
+        }
 
     ///
     /// Returns a parser that recognizes the string `s`.
