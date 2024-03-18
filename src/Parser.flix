@@ -82,7 +82,7 @@ mod Parser {
     ///
     pub def then(p1: Parser[a, b], p2: Parser[c, b]): Parser[(a, c), b] =
         inp ->
-            for (
+            forM (
                 (x1, rest1) <- p1(inp);
                 (x2, rest2) <- p2(rest1)
             ) yield ((x1, x2), rest2)
@@ -109,7 +109,7 @@ mod Parser {
     ///
     pub def using(p: Parser[a, b], f: a -> c): Parser[c, b] =
         inp ->
-            for (
+            forM (
                 (x, rest) <- p(inp)
             ) yield (f(x), rest)
 
