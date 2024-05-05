@@ -29,7 +29,7 @@ mod TestParser {
 
     def noInput(): Input[Char] = ENil
 
-    def l2d(l: m[a]): DelayList[a] with Foldable[m] = Foldable.toDelayList(l)
+    def l2d(l: m[a]): DelayList[a] \Foldable.Aef[m] with Foldable[m] = Foldable.toDelayList(l)
 
     def d2l(l: DelayList[a]): List[a] = DelayList.toList(l)
 

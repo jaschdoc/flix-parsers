@@ -175,11 +175,17 @@ mod Parser {
     ///
     /// This is generalization of `literal`.
     ///
-    pub def literalSequence(lit: m[a]): Parser[DelayList[a], a] with Eq[a], Foldable[m] =
+    pub def literalSequence(lit: m[a]): Parser[DelayList[a], a] \ Foldable.Aef[m] with Eq[a], Foldable[m] =
+        literalSequenceHelper(Foldable.toList(lit))
+
+    ///
+    /// Helper for `literalSequence` which does not have the foldable associated effect.
+    ///
+    def literalSequenceHelper(lit: List[a]): Parser[DelayList[a], a] with Eq[a] =
         inp -> inp // Wrap in lambda so the recursive call does not immediately happen
-            |> match Foldable.toList(lit) {
+            |> match lit {
                 case Nil     => succeed(ENil)
-                case x :: xs => (literal(x) `then` (literalSequence(xs))) `using` cons
+                case x :: xs => (literal(x) `then` (literalSequenceHelper(xs))) `using` cons
             }
 
     ///
@@ -211,7 +217,7 @@ mod Parser {
     ///
     /// Returns a parser that recognizes any of the elements in `syms`.
     ///
-    pub def any(f: a -> Parser[b, c], syms: m[a]): Parser[b, c] with Foldable[m] =
+    pub def any(f: a -> Parser[b, c], syms: m[a]): Parser[b, c] \ Foldable.Aef[m] with Foldable[m] =
         Foldable.foldRight(f >> otherwise, fail, syms)
 
     ///
@@ -223,7 +229,7 @@ mod Parser {
     ///
     /// Returns `chars` as a string.
     ///
-    pub def stringify(chars: m[Char]): String with Foldable[m] = region r {
+    pub def stringify(chars: m[Char]): String \ Foldable.Aef[m] with Foldable[m] = region r {
         let sb = StringBuilder.empty(r);
         let ap = sb |> flip(StringBuilder.append!);
         Foldable.forEach(ap, chars);
