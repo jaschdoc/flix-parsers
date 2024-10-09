@@ -2,6 +2,6 @@
 name        = "flix-parsers"
 description = "A simple parser library for Flix using higher-order functions as parsers"
 version     = "0.1.5"
-flix        = "0.35.0"
+flix        = "0.51.0"
 license     = "Apache-2.0"
 authors     = ["Jakob Schneider"]
