@@ -41,7 +41,7 @@ mod TestArith {
     }
 
     mod ArithParser {
-        use Parser.{number, literal, using, otherwise, then, thenIgnoringLeft, thenIgnoringRight};
+        use Parser.{nibble, number, literal, using, otherwise, then, thenIgnoringLeft, thenIgnoringRight};
         use TestArith.Exp;
 
         pub def parse(s: String): Option[Exp] =
@@ -64,8 +64,8 @@ mod TestArith {
         )
 
         def factor(input: Input[Char]): ParseResult[Exp, Char] = input |> (
-            (number `using` value) `otherwise`
-            (literal('(') `thenIgnoringLeft` exp `thenIgnoringRight` literal(')'))
+            (nibble(number) `using` value) `otherwise`
+            (nibble(literal('(')) `thenIgnoringLeft` exp `thenIgnoringRight` nibble(literal(')')))
         )
 
         def value(nums: Input[Char]): Exp =
@@ -195,6 +195,11 @@ mod TestArith {
     @Test
     pub def eval06(): Bool =
         ArithParser.parse("(2+2)/2+2/(2-1)")
+        |> testEval((2 + 2) / 2 + 2 / (2 - 1))
+
+    @Test
+    pub def eval07(): Bool =
+        ArithParser.parse(" ( 2  +    2 )/2 + 2/(2-   1)")
         |> testEval((2 + 2) / 2 + 2 / (2 - 1))
 
 
