@@ -231,7 +231,7 @@ mod Parser {
     ///
     pub def stringify(chars: m[Char]): String \ Foldable.Aef[m] with Foldable[m] = region r {
         let sb = StringBuilder.empty(r);
-        let ap = sb |> flip(StringBuilder.append!);
+        let ap = sb |> flip(StringBuilder.append);
         Foldable.forEach(ap, chars);
         StringBuilder.toString(sb)
     }
