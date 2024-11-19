@@ -980,7 +980,7 @@ mod TestParser {
         let actual = input |> (nibble(string("Hello")))
             |> DelayList.head
             |> Option.map(match (a, b) -> (stringify(a), stringify(b)));
-        let expected = Some("Hello", "world!");
+        let expected = Some(("Hello", "world!"));
         Assert.eq(expected, actual)
 
 }
