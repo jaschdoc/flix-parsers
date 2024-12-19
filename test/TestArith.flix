@@ -16,7 +16,7 @@
 
 mod TestArith {
 
-    enum Exp with Eq, ToString, Sendable {
+    enum Exp with Eq, ToString {
         case Num(Int32),
         case Add(Exp, Exp),
         case Sub(Exp, Exp),
