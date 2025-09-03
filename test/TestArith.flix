@@ -16,8 +16,6 @@
 
 mod TestArith {
 
-    use Assert.assertEq;
-
     enum Exp with Eq, ToString {
         case Num(Int32),
         case Add(Exp, Exp),
@@ -95,63 +93,63 @@ mod TestArith {
 
         @Test
         pub def factor01(): Bool =
-            assertEq(Some(Exp.Num(1)), testParser(factor, "1"))
+            Some(Exp.Num(1)) == testParser(factor, "1")
 
         @Test
         pub def factor02(): Bool =
-            assertEq(Some(Exp.Num(1)), testParser(factor, "(1)"))
+            Some(Exp.Num(1)) == testParser(factor, "(1)")
 
         @Test
         pub def factor03(): Bool =
-            assertEq(Some(Exp.Num(23)), testParser(factor, "(23)"))
+            Some(Exp.Num(23)) == testParser(factor, "(23)")
 
         @Test
         pub def term01(): Bool =
-            assertEq(Some(Exp.Mul(Exp.Num(2), Exp.Num(3))), testParser(term, "2*3"))
+            Some(Exp.Mul(Exp.Num(2), Exp.Num(3))) == testParser(term, "2*3")
 
         @Test
         pub def term02(): Bool =
-            assertEq(Some(Exp.Mul(Exp.Num(2), Exp.Num(3))), testParser(term, "(2*3)"))
+            Some(Exp.Mul(Exp.Num(2), Exp.Num(3))) == testParser(term, "(2*3)")
 
         @Test
         pub def term03(): Bool =
-            assertEq(Some(Exp.Div(Exp.Num(2), Exp.Num(3))), testParser(term, "2/3"))
+            Some(Exp.Div(Exp.Num(2), Exp.Num(3))) == testParser(term, "2/3")
 
         @Test
         pub def term04(): Bool =
-            assertEq(Some(Exp.Div(Exp.Num(2), Exp.Num(3))), testParser(term, "(2/3)"))
+            Some(Exp.Div(Exp.Num(2), Exp.Num(3))) == testParser(term, "(2/3)")
 
         @Test
         pub def term05(): Bool =
-            assertEq(Some(Exp.Num(42)), testParser(term, "42"))
+            Some(Exp.Num(42)) == testParser(term, "42")
 
         @Test
         pub def term06(): Bool =
-            assertEq(Some(Exp.Num(42)), testParser(term, "(42)"))
+            Some(Exp.Num(42)) == testParser(term, "(42)")
 
         @Test
         pub def exp01(): Bool =
-            assertEq(Some(Exp.Add(Exp.Num(5), Exp.Num(9))), testParser(exp, "5+9"))
+            Some(Exp.Add(Exp.Num(5), Exp.Num(9))) == testParser(exp, "5+9")
 
         @Test
         pub def exp02(): Bool =
-            assertEq(Some(Exp.Add(Exp.Num(5), Exp.Num(9))), testParser(exp, "(5+9)"))
+            Some(Exp.Add(Exp.Num(5), Exp.Num(9))) == testParser(exp, "(5+9)")
 
         @Test
         pub def exp03(): Bool =
-            assertEq(Some(Exp.Sub(Exp.Num(5), Exp.Num(9))), testParser(exp, "5-9"))
+            Some(Exp.Sub(Exp.Num(5), Exp.Num(9))) == testParser(exp, "5-9")
 
         @Test
         pub def exp04(): Bool =
-            assertEq(Some(Exp.Sub(Exp.Num(5), Exp.Num(9))), testParser(exp, "(5-9)"))
+            Some(Exp.Sub(Exp.Num(5), Exp.Num(9))) == testParser(exp, "(5-9)")
 
         @Test
         pub def exp05(): Bool =
-            assertEq(Some(Exp.Mul(Exp.Num(42), Exp.Num(2))), testParser(exp, "42*2"))
+            Some(Exp.Mul(Exp.Num(42), Exp.Num(2))) == testParser(exp, "42*2")
 
         @Test
         pub def exp06(): Bool =
-            assertEq(Some(Exp.Add(Exp.Num(5), Exp.Add(Exp.Num(2), Exp.Num(3)))), testParser(exp, "5+(2+3)"))
+            Some(Exp.Add(Exp.Num(5), Exp.Add(Exp.Num(2), Exp.Num(3)))) == testParser(exp, "5+(2+3)")
 
         def testParser(p: Input[Char] -> ParseResult[Exp, Char], inp: String): Option[Exp] =
             p(Parser.fromString(inp)) |> DelayList.head |> Option.map(fst)
@@ -164,7 +162,7 @@ mod TestArith {
     ////////////////////////////////////////////////////////////////////////
 
     def testEval(expected: Int32, prog: Option[Exp]): Bool = match prog {
-        case Some(e) => assertEq(expected, eval(e))
+        case Some(e) => expected == eval(e)
         case None    => unreachable!()
     }
 
@@ -172,7 +170,7 @@ mod TestArith {
     pub def eval01(): Bool =
         let actual = ArithParser.parse("");
         let expected = None;
-        assertEq(expected, actual)
+        expected == actual
 
     @Test
     pub def eval02(): Bool =
@@ -210,7 +208,7 @@ mod TestArith {
     ////////////////////////////////////////////////////////////////////////
 
     def testShow(expected: String, prog: Option[Exp]): Bool = match prog {
-        case Some(e) => assertEq(expected, show(e))
+        case Some(e) => expected == show(e)
         case None    => unreachable!()
     }
 
